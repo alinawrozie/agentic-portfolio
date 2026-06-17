@@ -1,0 +1,9 @@
+# Copy this file to terraform.tfvars and fill in your real values.
+# terraform.tfvars is gitignored — it's not committed, since it can
+# contain personal info like your email address.
+
+domain_name        = "yourdomain.com"
+aws_region          = "eu-west-2"
+create_hosted_zone  = false   # true only if Route 53 doesn't already have a zone for this domain
+sender_email        = "you@yourdomain.com"
+recipient_email     = "you@yourdomain.com"

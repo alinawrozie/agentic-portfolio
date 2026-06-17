@@ -1,0 +1,42 @@
+name: Terraform plan
+
+on:
+  pull_request:
+    paths:
+      - "infra/**"
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: terraform fmt
+        run: terraform -chdir=infra fmt -check -recursive
+
+      - name: terraform init
+        run: terraform -chdir=infra init
+
+      - name: terraform validate
+        run: terraform -chdir=infra validate
+
+      - name: terraform plan
+        run: terraform -chdir=infra plan -no-color
+        env:
+          TF_VAR_domain_name: ${{ secrets.TF_VAR_DOMAIN_NAME }}
+          TF_VAR_sender_email: ${{ secrets.TF_VAR_SENDER_EMAIL }}
+          TF_VAR_recipient_email: ${{ secrets.TF_VAR_RECIPIENT_EMAIL }}
+
+# Deliberately no `terraform apply` here. Infra changes get reviewed in the
+# PR via this plan output, then applied locally with ./scripts/deploy.sh
+# once you're happy with it. Wire up an apply-on-merge job later if you
+# want full auto-apply — just be sure you trust everything in infra/ first.
