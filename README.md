@@ -1,9 +1,10 @@
 # Portfolio — AWS Infrastructure as Code
 
-A personal portfolio site, hosted entirely on AWS, fully defined in
-Terraform. No manual console steps. Deployed via GitHub Actions using OIDC
-federation — there is no AWS access key sitting in this repo's secrets at
-any point.
+A personal portfolio site, hosted entirely on AWS, fully defined in Terraform. No manual console steps. 
+
+This repository supports two deployment workflows:
+1. **Automated CI/CD**: Deployed via GitHub Actions using OIDC federation (no static AWS access keys are stored in secrets).
+2. **Manual Local CLI**: Deployed and managed directly from your local terminal using the AWS CLI and Terraform.
 
 ```
 User → Route 53 → CloudFront (HTTPS) → S3 (private, OAC-only)
@@ -11,159 +12,139 @@ User → Route 53 → CloudFront (HTTPS) → S3 (private, OAC-only)
                    API Gateway (HTTP API) → Lambda (Python) → SES → your inbox
 ```
 
-See [`ADR.md`](./ADR.md) for the reasoning behind the three core architecture
-decisions.
+See [`ADR.md`](./ADR.md) for the reasoning behind the core architectural decisions (serverless backend, CloudFront CDN, and HTTP API Gateway).
 
-## Repository layout
+---
+
+## Repository Layout
 
 ```
 infra/bootstrap/   Terraform state backend (S3 + DynamoDB) + GitHub OIDC
-                    trust + deploy IAM role. Applied manually, ONCE, by you.
+                    trust + deploy IAM role (hardened for least-privilege).
 infra/              Main infrastructure: ACM, S3, CloudFront, Route 53,
-                    Lambda, API Gateway, SES, CloudWatch alarm. Applied by
-                    GitHub Actions (and optionally by you locally).
+                    Lambda, API Gateway, SES, CloudWatch alarm.
 lambda/             Python contact-form handler, packaged by Terraform.
-frontend/           Static site (HTML/CSS/JS) synced to S3 on every deploy.
+frontend/           Static site (HTML/CSS/JS) synced to S3.
 .github/workflows/  CI/CD pipeline: terraform plan/apply, then sync + invalidate.
 ```
 
-## One-time setup
+---
 
-### 1. Prerequisites
+## Step 1: Prerequisites & Configuration
 
-- An AWS account with credentials configured locally (`aws configure`) —
-  used only for the one-time bootstrap step below, never stored anywhere
-  after.
-- [Terraform](https://developer.hashicorp.com/terraform/install) >= 1.6
-- A domain name you control (registered via Route 53 or elsewhere)
-- This repo pushed to GitHub
+Before deploying, make sure you have:
+1. An AWS account with credentials configured locally (`aws configure`).
+2. [Terraform](https://developer.hashicorp.com/terraform/install) >= 1.6 installed.
+3. A domain name registered in AWS Route 53.
+4. Replace bracketed placeholders inside [frontend/index.html](./frontend/index.html) (name, email, certification links).
 
-### 2. Bootstrap: state backend + GitHub OIDC trust
+---
 
-```bash
-cd infra/bootstrap
-cp terraform.tfvars.example terraform.tfvars
-# edit terraform.tfvars: state_bucket_name, github_org, github_repo, github_branch
+## Step 2: Bootstrap Remote State & OIDC Trust
 
-terraform init
-terraform apply
-```
+To create the secure S3 state backend and configure GitHub OIDC federation:
+1. Navigate to the bootstrap folder:
+   ```bash
+   cd infra/bootstrap
+   ```
+2. Copy `terraform.tfvars.example` to `terraform.tfvars`:
+   ```bash
+   cp terraform.tfvars.example terraform.tfvars
+   ```
+3. Edit `terraform.tfvars` with your details (use `agentic-portfolio` as `github_repo`).
+4. Initialize and apply:
+   ```bash
+   terraform init
+   terraform apply
+   ```
+Record the outputs: `state_bucket_name`, `lock_table_name`, and `github_deploy_role_arn`.
 
-This creates:
-- An S3 bucket + DynamoDB table to hold the main config's remote Terraform
-  state (with locking, so a local `apply` and a CI `apply` can't collide).
-- An IAM OIDC identity provider trusting `token.actions.githubusercontent.com`.
-- An IAM role (`<repo>-github-actions-deploy`) that only your exact
-  `org/repo` on your exact branch can assume — and only via a short-lived
-  token GitHub mints per workflow run. No access key, no secret, nothing to
-  rotate or leak.
+---
 
-Note the two outputs `state_bucket_name` and `github_deploy_role_arn` — you need them next.
+## Step 3: Reference the Remote State Backend
 
-### 3. Point the main config at that state backend
+Open [infra/backend.tf](./infra/backend.tf) and update the values with your bootstrap outputs:
+* Set `bucket` to your `state_bucket_name`.
+* Set `use_lockfile = true` (or `dynamodb_table` to your `lock_table_name`).
 
-Edit `infra/backend.tf`: replace the placeholder `bucket` and
-`dynamodb_table` values with the bootstrap outputs.
+---
 
-### 4. Configure GitHub repository variables
+## Step 4: Choose Your Deployment Path
 
-In your GitHub repo: **Settings → Secrets and variables → Actions → Variables**, add:
+Choose **one** of the two paths below to deploy the main portfolio infrastructure and website files:
 
-| Variable | Value |
-|---|---|
-| `AWS_DEPLOY_ROLE_ARN` | the `github_deploy_role_arn` bootstrap output |
-| `DOMAIN_NAME` | e.g. `yourname.com` |
-| `CONTACT_FORM_RECIPIENT_EMAIL` | where form submissions land |
-| `SES_SENDER_EMAIL` | the SES "from" address (can match the above) |
-| `ALARM_NOTIFICATION_EMAIL` | where CloudWatch alarm emails go |
+### Path A: Automated Deploy (GitHub Actions CI/CD)
+1. **Configure GitHub Repository Variables**:
+   In your repository: **Settings → Secrets and variables → Actions → Variables**, add:
+   * `AWS_DEPLOY_ROLE_ARN`: Your `github_deploy_role_arn` output.
+   * `DOMAIN_NAME`: e.g. `nawrozie.com`
+   * `CONTACT_FORM_RECIPIENT_EMAIL`: Where contact form emails land.
+   * `SES_SENDER_EMAIL`: The "from" address SES sends with (can match recipient email).
+   * `ALARM_NOTIFICATION_EMAIL`: Where CloudWatch alarm emails go.
+2. **Push to main**:
+   ```bash
+   git add .
+   git commit -m "Initial portfolio setup"
+   git branch -M main
+   git remote add origin https://github.com/<your-username>/agentic-portfolio.git
+   git push -u origin main --force
+   ```
+   GitHub Actions will automatically run `terraform apply`, sync your files, and invalidate the CDN cache.
 
-These are plain repository **variables**, not secrets — nothing here is
-sensitive (it's a domain name and email addresses), and the workflow reads
-them as `vars.*`.
+---
 
-### 5. Push to `main`
+### Path B: Manual Deploy (Local Terminal)
+1. **Configure Local Variables**:
+   ```bash
+   cd infra
+   cp terraform.tfvars.example terraform.tfvars
+   ```
+   Edit `terraform.tfvars` and set your domain name, emails, and set `create_route53_zone = false` (since Route 53 domain registration already created your hosted zone).
+2. **Run Terraform**:
+   ```bash
+   terraform init
+   terraform apply
+   ```
+3. **Configure the Frontend API Endpoint**:
+   Get the `contact_api_endpoint` output and update `API_ENDPOINT` on line 6 of [frontend/script.js](./frontend/script.js).
+4. **Sync Frontend Files to S3**:
+   From the repository root:
+   ```bash
+   aws s3 sync frontend/ s3://nawrozie.com --delete
+   ```
+5. **Invalidate CloudFront Cache**:
+   ```bash
+   aws cloudfront create-invalidation --distribution-id <cloudfront_distribution_id> --paths "/*"
+   ```
 
-```bash
-git add .
-git commit -m "Initial infrastructure and site content"
-git branch -M main
-git remote add origin https://github.com/<your-org>/<your-repo>.git
-git push -u origin main
-```
+---
 
-GitHub Actions takes it from there: `terraform plan` → `terraform apply` →
-sync `frontend/` to S3 → invalidate the CloudFront cache.
+## Step 5: Post-Deployment Verification
 
-### 6. After the first apply
+1. **Verify SES Sender Email**: Check the inbox of your sender email for an AWS SES verification message and click the verification link.
+2. **Confirm SNS Alarm Subscription**: Check the inbox of your alarm email and click the confirmation link from AWS SNS to enable alerts.
 
-A few things Terraform deliberately can't automate, because AWS requires a
-human in the loop:
+---
 
-- **Nameservers** (only if `create_route53_zone = true`): run
-  `terraform output route53_nameservers` and update your domain registrar to
-  point at them. DNS propagation can take up to 48 hours, though it's
-  usually much faster.
-- **SES verification**: check the inbox for `SES_SENDER_EMAIL` (and the
-  recipient address, if different) for an AWS verification email, and click
-  the link. The contact form will fail until this is done.
-- **SNS alarm subscription**: check the inbox for `ALARM_NOTIFICATION_EMAIL`
-  for an SNS subscription confirmation email, and confirm it.
+## Troubleshooting: Error Acquiring State Lock
+If a network disconnect occurs during an active apply, Terraform may fail to release the state lock. 
+1. Note the lock ID from the terminal error message.
+2. Run the unlock command:
+   ```bash
+   terraform force-unlock <lock-id>
+   ```
 
-### 7. Wire up the frontend's API endpoint
+---
 
-After the first successful apply, get the contact form endpoint:
-
-```bash
-cd infra
-terraform output contact_api_endpoint
-```
-
-Put that value into `CONTACT_API_ENDPOINT` in `frontend/script.js`, commit,
-and push — the next CI run syncs it to S3 and invalidates the cache.
-
-Also replace the `REPLACE_ME` placeholders in `frontend/index.html` (GitHub
-link) with your actual repo URL.
-
-## Local development / manual apply (optional)
-
-CI handles deploys, but you can also run Terraform locally against the same
-remote state:
-
-```bash
-cd infra
-cp terraform.tfvars.example terraform.tfvars   # fill in your values
-terraform init
-terraform plan
-terraform apply
-```
-
-Because state is remote and locked (via the DynamoDB table from bootstrap),
-this is safe to do even with CI also configured — Terraform will queue
-rather than corrupt state if both run close together.
-
-## Updating the site after this initial setup
-
-- **Content changes** (new project, new certification): edit
-  `frontend/index.html`, push to `main`. CI syncs S3 and invalidates the
-  CloudFront cache automatically — no Terraform involved.
-- **Infrastructure changes** (e.g. a new CloudWatch alarm, a new Lambda
-  environment variable): edit the relevant `.tf` file, push to `main`. CI
-  runs `terraform plan` then `terraform apply`.
-- **Pull requests**: the workflow runs `terraform plan` (not `apply`) on PRs
-  against `main`, so you get a preview of infrastructure changes before
-  merging.
-
-## Estimated monthly cost
+## Estimated Monthly Cost
 
 | Service | Cost |
 |---|---|
-| Route 53 hosted zone | $0.50/mo |
+| Route 53 Hosted Zone | $0.50/mo |
 | S3 | < $0.01/mo |
-| CloudFront | $0 (free tier: 1TB/10M requests) |
+| CloudFront | $0 (Free Tier: 1TB bandwidth) |
 | ACM | $0 |
-| Lambda | $0 (free tier: 1M requests) |
-| API Gateway | $0 (free tier: 1M calls) |
-| SES | $0 (free tier: 62,000 emails/mo) |
-| **Total** | **~$0.50–$2/mo** |
-
-(Excludes one-time domain registration, ~$9–$14/yr for `.com`.)
+| Lambda | $0 (Free Tier: 1M invocations) |
+| API Gateway | $0 (Free Tier: 1M calls) |
+| SES | $0 (Free Tier: 62,000 emails/mo) |
+| **Total** | **~$0.50/mo** |
