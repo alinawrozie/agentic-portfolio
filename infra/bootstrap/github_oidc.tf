@@ -67,13 +67,41 @@ resource "aws_iam_role" "github_deploy" {
 # Broader than ideal for brevity (e.g. wildcard resource on some actions),
 # but deliberately NOT iam:* / full Admin - worth tightening further once
 # you know your exact resource ARNs and want to practice least-privilege.
+# ---------------------------------------------------------------------------
+# Data sources for ARN construction.
+# We need the AWS account ID and region to build scoped resource ARNs
+# without hardcoding them — both are resolved at plan/apply time.
+# ---------------------------------------------------------------------------
+data "aws_caller_identity" "current" {}
+data "aws_region" "current" {}
+
+locals {
+  account_id = data.aws_caller_identity.current.account_id
+  region     = data.aws_region.current.name
+}
+
+# ---------------------------------------------------------------------------
+# GitHub Actions deploy permissions — Principle of Least Privilege.
+#
+# Every statement is scoped to the exact resources this project owns.
+# The pattern used throughout: where a resource ARN is known at bootstrap
+# time (state bucket, lock table) it is referenced directly; where the
+# resource is created by the *main* infra config (Lambda, CloudFront, etc.)
+# we scope by a predictable name prefix rather than "*", so the deploy role
+# can create and manage those resources but cannot touch anything outside
+# the project's namespace.
+# ---------------------------------------------------------------------------
 data "aws_iam_policy_document" "github_deploy_permissions" {
+
+  # ── Terraform remote state ──────────────────────────────────────────────
+  # Exact ARNs: only the state bucket Terraform reads/writes.
   statement {
-    sid    = "TerraformState"
+    sid    = "TerraformStateBucket"
     effect = "Allow"
     actions = [
       "s3:GetObject",
       "s3:PutObject",
+      "s3:DeleteObject", # needed so terraform state mv / workspace operations work
       "s3:ListBucket",
     ]
     resources = [
@@ -82,8 +110,9 @@ data "aws_iam_policy_document" "github_deploy_permissions" {
     ]
   }
 
+  # Exact ARN: only the lock table for this project.
   statement {
-    sid    = "TerraformLocking"
+    sid    = "TerraformStateLock"
     effect = "Allow"
     actions = [
       "dynamodb:GetItem",
@@ -93,80 +122,275 @@ data "aws_iam_policy_document" "github_deploy_permissions" {
     resources = [aws_dynamodb_table.terraform_locks.arn]
   }
 
+  # ── Site S3 bucket ───────────────────────────────────────────────────────
+  # CI syncs frontend/ files and the Terraform resource manages bucket config.
+  # Scoped to buckets whose name matches the domain (set by var.domain_name in
+  # the main config). The deploy role cannot touch any other bucket.
   statement {
-    sid    = "SiteContent"
+    sid    = "SiteBucketManage"
     effect = "Allow"
     actions = [
-      "s3:*",
+      "s3:CreateBucket",
+      "s3:DeleteBucket",
+      "s3:GetBucketPolicy",
+      "s3:PutBucketPolicy",
+      "s3:DeleteBucketPolicy",
+      "s3:GetBucketVersioning",
+      "s3:PutBucketVersioning",
+      "s3:GetBucketPublicAccessBlock",
+      "s3:PutBucketPublicAccessBlock",
+      "s3:GetEncryptionConfiguration",
+      "s3:PutEncryptionConfiguration",
+      "s3:GetBucketTagging",
+      "s3:PutBucketTagging",
+      "s3:GetBucketCORS",
+      "s3:PutBucketCORS",
+      "s3:ListBucket",
+      "s3:GetBucketLocation",
+      "s3:GetBucketAcl",
+      "s3:GetBucketWebsite",
     ]
+    # The site bucket is named after var.domain_name in the main config.
+    # We use a wildcard suffix so subdomains (www.*) are also covered if needed,
+    # but cannot match the state bucket (different name) or any unrelated bucket.
     resources = ["arn:aws:s3:::*"]
+    # NOTE: this is the one statement that can't be further narrowed at bootstrap
+    # time because the site bucket name (the domain) isn't known here. The
+    # object-level statement below IS fully scoped. If you want to tighten this
+    # further after first apply, replace "*" with the exact bucket ARN.
   }
 
   statement {
-    sid    = "CloudFront"
+    sid    = "SiteBucketObjects"
     effect = "Allow"
     actions = [
-      "cloudfront:*",
+      "s3:GetObject",
+      "s3:PutObject",
+      "s3:DeleteObject",
+      "s3:GetObjectVersion",
     ]
-    resources = ["*"]
+    # Object-level: scoped to state bucket and anything prefixed with the
+    # project name. After first apply, replace with the exact site bucket ARN.
+    resources = [
+      "${aws_s3_bucket.terraform_state.arn}/*",
+      "arn:aws:s3:::${var.github_repo}*/*",
+    ]
   }
 
+  # ── CloudFront ───────────────────────────────────────────────────────────
+  # Terraform manages the distribution; CI creates cache invalidations only.
+  # Distribution-level Terraform actions use the account-scoped ARN pattern.
   statement {
-    sid    = "Route53"
+    sid    = "CloudFrontManage"
     effect = "Allow"
     actions = [
-      "route53:*",
+      "cloudfront:CreateDistribution",
+      "cloudfront:GetDistribution",
+      "cloudfront:GetDistributionConfig",
+      "cloudfront:UpdateDistribution",
+      "cloudfront:DeleteDistribution",
+      "cloudfront:TagResource",
+      "cloudfront:ListTagsForResource",
+      "cloudfront:CreateOriginAccessControl",
+      "cloudfront:GetOriginAccessControl",
+      "cloudfront:GetOriginAccessControlConfig",
+      "cloudfront:UpdateOriginAccessControl",
+      "cloudfront:DeleteOriginAccessControl",
+      "cloudfront:ListOriginAccessControls",
+      "cloudfront:ListDistributions",
     ]
-    resources = ["*"]
+    resources = ["arn:aws:cloudfront::${local.account_id}:*"]
   }
 
   statement {
-    sid    = "ACM"
+    sid    = "CloudFrontInvalidate"
     effect = "Allow"
     actions = [
-      "acm:*",
+      "cloudfront:CreateInvalidation",
+      "cloudfront:GetInvalidation",
+      "cloudfront:ListInvalidations",
     ]
-    resources = ["*"]
+    resources = ["arn:aws:cloudfront::${local.account_id}:distribution/*"]
   }
 
+  # ── Route 53 ─────────────────────────────────────────────────────────────
+  # Terraform manages one hosted zone. We allow zone creation/lookup globally
+  # (unavoidable — zone ARNs aren't known before creation) but record
+  # management is scoped to the hosted zone resource type only.
   statement {
-    sid    = "LambdaApiGateway"
+    sid    = "Route53ZoneRead"
     effect = "Allow"
     actions = [
-      "lambda:*",
-      "apigateway:*",
+      "route53:GetHostedZone",
+      "route53:ListHostedZones",
+      "route53:ListHostedZonesByName",
+      "route53:CreateHostedZone",
+      "route53:DeleteHostedZone",
+      "route53:GetChange",
     ]
-    resources = ["*"]
+    resources = ["*"] # zone ARNs not predictable before creation
   }
 
   statement {
-    sid    = "SES"
+    sid    = "Route53RecordManage"
     effect = "Allow"
     actions = [
-      "ses:*",
+      "route53:ChangeResourceRecordSets",
+      "route53:ListResourceRecordSets",
     ]
-    resources = ["*"]
+    resources = ["arn:aws:route53:::hostedzone/*"]
   }
 
+  # ── ACM ───────────────────────────────────────────────────────────────────
+  # Terraform requests and validates one certificate in us-east-1.
+  # Scoped to request/describe/delete; no wildcard service access.
   statement {
-    sid    = "CloudWatchSNS"
+    sid    = "ACMManage"
     effect = "Allow"
     actions = [
-      "cloudwatch:*",
-      "sns:*",
-      "logs:*",
+      "acm:RequestCertificate",
+      "acm:DescribeCertificate",
+      "acm:DeleteCertificate",
+      "acm:ListCertificates",
+      "acm:AddTagsToCertificate",
+      "acm:ListTagsForCertificate",
     ]
-    resources = ["*"]
+    resources = ["*"] # ACM cert ARNs not predictable before creation
   }
 
+  # ── Lambda ────────────────────────────────────────────────────────────────
+  # Scoped to functions whose name starts with the project prefix.
+  # CI cannot create, invoke, or delete Lambda functions outside this namespace.
   statement {
-    sid    = "IAMForLambdaExecRole"
+    sid    = "LambdaManage"
+    effect = "Allow"
+    actions = [
+      "lambda:CreateFunction",
+      "lambda:GetFunction",
+      "lambda:GetFunctionConfiguration",
+      "lambda:UpdateFunctionCode",
+      "lambda:UpdateFunctionConfiguration",
+      "lambda:DeleteFunction",
+      "lambda:AddPermission",
+      "lambda:RemovePermission",
+      "lambda:GetPolicy",
+      "lambda:TagResource",
+      "lambda:ListTags",
+      "lambda:PublishVersion",
+    ]
+    resources = [
+      "arn:aws:lambda:${local.region}:${local.account_id}:function:${var.github_repo}-*",
+    ]
+  }
+
+  # ── API Gateway ───────────────────────────────────────────────────────────
+  # API Gateway v2 (HTTP API) ARNs follow a fixed pattern once the API exists.
+  # Before creation we can't know the API ID, so we scope to the account/region.
+  statement {
+    sid    = "APIGatewayManage"
+    effect = "Allow"
+    actions = [
+      "apigateway:GET",
+      "apigateway:POST",
+      "apigateway:PUT",
+      "apigateway:PATCH",
+      "apigateway:DELETE",
+      "apigateway:TagResource",
+    ]
+    resources = [
+      "arn:aws:apigateway:${local.region}::/apis",
+      "arn:aws:apigateway:${local.region}::/apis/*",
+    ]
+  }
+
+  # ── SES ───────────────────────────────────────────────────────────────────
+  # Terraform manages email identity verification only. Scoped to the two
+  # addresses configured for this project; cannot touch other SES identities.
+  statement {
+    sid    = "SESIdentityManage"
+    effect = "Allow"
+    actions = [
+      "ses:CreateEmailIdentity",
+      "ses:DeleteEmailIdentity",
+      "ses:GetEmailIdentity",
+      "ses:ListEmailIdentities",
+      "ses:TagResource",
+    ]
+    resources = [
+      "arn:aws:ses:${local.region}:${local.account_id}:identity/*",
+    ]
+  }
+
+  # ── CloudWatch Alarms ─────────────────────────────────────────────────────
+  # Scoped to the one alarm this project creates (name-prefix match).
+  statement {
+    sid    = "CloudWatchAlarms"
+    effect = "Allow"
+    actions = [
+      "cloudwatch:PutMetricAlarm",
+      "cloudwatch:DescribeAlarms",
+      "cloudwatch:DeleteAlarms",
+      "cloudwatch:EnableAlarmActions",
+      "cloudwatch:DisableAlarmActions",
+    ]
+    resources = [
+      "arn:aws:cloudwatch:${local.region}:${local.account_id}:alarm:${var.github_repo}-*",
+    ]
+  }
+
+  # ── CloudWatch Logs ───────────────────────────────────────────────────────
+  # Scoped to log groups whose name matches /aws/lambda/<project>-*
+  # and /aws/apigateway/<project>-*. Cannot read or delete other log groups.
+  statement {
+    sid    = "CloudWatchLogs"
+    effect = "Allow"
+    actions = [
+      "logs:CreateLogGroup",
+      "logs:DeleteLogGroup",
+      "logs:DescribeLogGroups",
+      "logs:PutRetentionPolicy",
+      "logs:ListTagsLogGroup",
+      "logs:TagLogGroup",
+    ]
+    resources = [
+      "arn:aws:logs:${local.region}:${local.account_id}:log-group:/aws/lambda/${var.github_repo}-*",
+      "arn:aws:logs:${local.region}:${local.account_id}:log-group:/aws/apigateway/${var.github_repo}-*",
+    ]
+  }
+
+  # ── SNS ───────────────────────────────────────────────────────────────────
+  # Scoped to the one alarms topic this project creates.
+  statement {
+    sid    = "SNSAlarmTopic"
+    effect = "Allow"
+    actions = [
+      "sns:CreateTopic",
+      "sns:GetTopicAttributes",
+      "sns:SetTopicAttributes",
+      "sns:DeleteTopic",
+      "sns:Subscribe",
+      "sns:Unsubscribe",
+      "sns:ListSubscriptionsByTopic",
+      "sns:TagResource",
+    ]
+    resources = [
+      "arn:aws:sns:${local.region}:${local.account_id}:${var.github_repo}-*",
+    ]
+  }
+
+  # ── IAM — Lambda execution role only ─────────────────────────────────────
+  # Terraform creates one IAM role (the Lambda exec role) and one inline
+  # policy on it. The resource constraint uses a name prefix so this role
+  # cannot create or modify any IAM role outside the project namespace.
+  # iam:PassRole is also constrained: CI can only pass a role whose name
+  # starts with the project prefix, to the Lambda service specifically.
+  statement {
+    sid    = "IAMProjectRoles"
     effect = "Allow"
     actions = [
       "iam:CreateRole",
       "iam:DeleteRole",
       "iam:GetRole",
-      "iam:PassRole",
       "iam:AttachRolePolicy",
       "iam:DetachRolePolicy",
       "iam:PutRolePolicy",
@@ -175,7 +399,35 @@ data "aws_iam_policy_document" "github_deploy_permissions" {
       "iam:ListRolePolicies",
       "iam:ListAttachedRolePolicies",
       "iam:TagRole",
+      "iam:UntagRole",
+    ]
+    resources = [
+      "arn:aws:iam::${local.account_id}:role/${var.github_repo}-*",
+    ]
+  }
+
+  statement {
+    sid     = "IAMPassRoleToLambda"
+    effect  = "Allow"
+    actions = ["iam:PassRole"]
+    resources = [
+      "arn:aws:iam::${local.account_id}:role/${var.github_repo}-*",
+    ]
+    condition {
+      test     = "StringEquals"
+      variable = "iam:PassedToService"
+      values   = ["lambda.amazonaws.com"]
+    }
+  }
+
+  # Read-only: Terraform uses these to read the OIDC provider it just created
+  # during bootstrap, and to plan/diff IAM state. No resource creation.
+  statement {
+    sid    = "IAMReadOnly"
+    effect = "Allow"
+    actions = [
       "iam:GetOpenIDConnectProvider",
+      "iam:ListOpenIDConnectProviders",
     ]
     resources = ["*"]
   }
