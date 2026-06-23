@@ -1,16 +1,19 @@
 # Terraform
-infra/.terraform/
-infra/*.tfstate
-infra/*.tfstate.*
-infra/terraform.tfvars
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+*.tfplan
+tfplan
+crash.log
+crash.*.log
+*.tfvars
+!*.tfvars.example
 infra/build/
+# Note: .terraform.lock.hcl is intentionally NOT ignored - commit it for
+# reproducible provider versions across your machine and CI.
 
-# OS / editor
+# OS / editor noise
 .DS_Store
 *.swp
 .vscode/
 .idea/
-
-# Python
-__pycache__/
-*.pyc

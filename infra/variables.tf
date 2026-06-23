@@ -1,46 +1,37 @@
-variable "domain_name" {
-  description = "Root domain for the portfolio, e.g. yourname.com. Must already be a registered domain."
-  type        = string
-}
-
 variable "aws_region" {
-  description = "Region for S3, Lambda, API Gateway, SES and CloudWatch."
+  description = "Primary AWS region for S3, Lambda, API Gateway, etc."
   type        = string
   default     = "eu-west-2"
 }
 
-variable "create_hosted_zone" {
-  description = "true if Route 53 should create a new hosted zone for domain_name. false if you already have one (e.g. because you registered the domain through Route 53, which creates a zone automatically)."
+variable "domain_name" {
+  description = "Your apex domain, e.g. yourname.com"
+  type        = string
+}
+
+variable "create_route53_zone" {
+  description = "Set true if Route 53 should create the hosted zone (first-time setup). Set false if you already have a zone and are importing it instead."
   type        = bool
-  default     = false
+  default     = true
 }
 
-variable "sender_email" {
-  description = "Email address the contact form sends FROM. Must be verified in SES (SES sandbox mode requires this regardless of recipient)."
+variable "contact_form_recipient_email" {
+  description = "The email address that receives contact form submissions. Must be SES-verified while SES is in sandbox mode."
   type        = string
 }
 
-variable "recipient_email" {
-  description = "Your email address — where contact form submissions and CloudWatch alarms are delivered. Must also be verified in SES while your account is in sandbox mode."
+variable "ses_sender_email" {
+  description = "The 'from' address SES sends with. Must be SES-verified while SES is in sandbox mode. Can be the same as contact_form_recipient_email."
   type        = string
 }
 
-variable "lambda_runtime" {
-  description = "Lambda Python runtime."
+variable "alarm_notification_email" {
+  description = "Email address to receive CloudWatch alarm notifications (Lambda errors)"
   type        = string
-  default     = "python3.12"
 }
 
-variable "cloudfront_price_class" {
-  description = "PriceClass_100 (NA/EU only, cheapest), PriceClass_200, or PriceClass_All."
+variable "project_name" {
+  description = "Short name used as a prefix for resource naming"
   type        = string
-  default     = "PriceClass_100"
-}
-
-variable "tags" {
-  description = "Common tags applied to all resources."
-  type        = map(string)
-  default = {
-    Project = "personal-portfolio"
-  }
+  default     = "portfolio"
 }

@@ -1,5 +1,5 @@
 terraform {
-  required_version = ">= 1.5.0"
+  required_version = ">= 1.6.0"
 
   required_providers {
     aws = {
@@ -13,14 +13,15 @@ terraform {
   }
 }
 
-# Primary provider — used for S3, Lambda, API Gateway, SES, CloudWatch.
-# Pick whichever region you want these resources to live in.
+# Primary region for most resources.
 provider "aws" {
   region = var.aws_region
 }
 
-# CloudFront only accepts ACM certificates issued in us-east-1,
-# regardless of which region everything else runs in.
+# CloudFront only accepts ACM certificates issued in us-east-1, no matter
+# which region the distribution's other resources live in. This alias lets
+# the acm.tf resources target us-east-1 specifically while everything else
+# uses var.aws_region.
 provider "aws" {
   alias  = "us_east_1"
   region = "us-east-1"

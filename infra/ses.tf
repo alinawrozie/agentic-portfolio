@@ -1,19 +1,20 @@
-# While the SES account is in sandbox mode (the default for new
-# accounts), BOTH the sender and recipient addresses must be verified.
-# Terraform can request verification, but you still have to click the
-# confirmation link AWS emails to each address - that step can't be
-# automated. Run `aws ses list-identities --identity-type EmailAddress`
-# to check status, or look in the SES console under "Verified identities".
+# SES starts every new account in "sandbox" mode, where you can only send
+# TO and FROM addresses you've manually verified - this is enough for a
+# personal contact form where you are the only recipient. Terraform creates
+# the verification request; you still have to click the confirmation link
+# AWS emails you (this is an SES anti-abuse requirement, not something any
+# amount of automation can skip).
 #
-# To send to arbitrary recipients later (e.g. anyone who emails the
-# real form), request SES production access - a short form in the
-# SES console, usually approved within 24h.
+# If you later want the form to work for arbitrary senders without
+# verifying every visitor's email, request SES production access in the
+# AWS console - Terraform can't automate that approval step either, since
+# it involves a manual AWS review.
 
-locals {
-  ses_identities = distinct([var.sender_email, var.recipient_email])
+resource "aws_ses_email_identity" "sender" {
+  email = var.ses_sender_email
 }
 
-resource "aws_ses_email_identity" "verified" {
-  for_each = toset(local.ses_identities)
-  email    = each.value
+resource "aws_ses_email_identity" "recipient" {
+  count = var.ses_sender_email != var.contact_form_recipient_email ? 1 : 0
+  email = var.contact_form_recipient_email
 }

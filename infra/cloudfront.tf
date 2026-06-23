@@ -1,5 +1,5 @@
 resource "aws_cloudfront_origin_access_control" "site" {
-  name                              = "${var.domain_name}-oac"
+  name                              = "${var.project_name}-oac"
   origin_access_control_origin_type = "s3"
   signing_behavior                  = "always"
   signing_protocol                  = "sigv4"
@@ -9,32 +9,46 @@ resource "aws_cloudfront_distribution" "site" {
   enabled             = true
   is_ipv6_enabled     = true
   default_root_object = "index.html"
-  aliases             = [var.domain_name]
-  price_class         = var.cloudfront_price_class
-  tags                = var.tags
+  aliases             = [var.domain_name, "www.${var.domain_name}"]
+  price_class         = "PriceClass_100" # North America + Europe edge locations - cheapest tier, plenty for a CV-stage portfolio
 
   origin {
     domain_name              = aws_s3_bucket.site.bucket_regional_domain_name
-    origin_id                = "s3-site-origin"
+    origin_id                = "s3-${aws_s3_bucket.site.id}"
     origin_access_control_id = aws_cloudfront_origin_access_control.site.id
   }
 
   default_cache_behavior {
-    target_origin_id       = "s3-site-origin"
+    allowed_methods        = ["GET", "HEAD"]
+    cached_methods         = ["GET", "HEAD"]
+    target_origin_id       = "s3-${aws_s3_bucket.site.id}"
     viewer_protocol_policy = "redirect-to-https"
-    allowed_methods         = ["GET", "HEAD"]
-    cached_methods          = ["GET", "HEAD"]
     compress                = true
 
-    # Managed-CachingOptimized policy - long edge caching for a static site.
-    cache_policy_id = "658327ea-f89d-4fab-a63d-7e88639e58f6"
+    forwarded_values {
+      query_string = false
+      cookies {
+        forward = "none"
+      }
+    }
+
+    min_ttl     = 0
+    default_ttl = 3600
+    max_ttl     = 86400
   }
 
-  # A custom 404 avoids leaking S3's default XML error page if a stray
-  # path is hit, since the bucket is private and has no website config.
+  # A single-page static site with no router still benefits from this:
+  # any unexpected 403/404 from S3 (e.g. someone hits a path that doesn't
+  # exist) falls back to index.html rather than showing a raw S3 error page.
+  custom_error_response {
+    error_code         = 403
+    response_code      = 200
+    response_page_path = "/index.html"
+  }
+
   custom_error_response {
     error_code         = 404
-    response_code      = 404
+    response_code      = 200
     response_page_path = "/index.html"
   }
 

@@ -1,12 +1,14 @@
-# CloudFront requires the certificate to exist in us-east-1, hence the
-# provider alias from providers.tf — independent of where the rest of
-# the stack runs.
+# Issued in us-east-1 specifically because CloudFront requires it there
+# (see providers.tf for why). DNS validation is fully automated below -
+# Terraform creates the CNAME record in Route 53 and waits for AWS to
+# confirm domain ownership, so there's no manual console step.
 
 resource "aws_acm_certificate" "site" {
-  provider                 = aws.us_east_1
+  provider = aws.us_east_1
+
   domain_name               = var.domain_name
-  validation_method         = "DNS"
-  tags                      = var.tags
+  subject_alternative_names = ["www.${var.domain_name}"]
+  validation_method          = "DNS"
 
   lifecycle {
     create_before_destroy = true
@@ -30,7 +32,8 @@ resource "aws_route53_record" "cert_validation" {
 }
 
 resource "aws_acm_certificate_validation" "site" {
-  provider                = aws.us_east_1
+  provider = aws.us_east_1
+
   certificate_arn         = aws_acm_certificate.site.arn
   validation_record_fqdns = [for r in aws_route53_record.cert_validation : r.fqdn]
 }

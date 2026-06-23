@@ -1,0 +1,100 @@
+name: Deploy Portfolio
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Required so GitHub can mint the OIDC token this workflow exchanges for
+# temporary AWS credentials. Without 'id-token: write', the OIDC handshake
+# in configure-aws-credentials below cannot happen.
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: eu-west-2
+  TF_VERSION: "1.7.5"
+
+jobs:
+  terraform:
+    name: Terraform plan/apply
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: infra
+    outputs:
+      s3_bucket: ${{ steps.tf_outputs.outputs.s3_bucket }}
+      cloudfront_id: ${{ steps.tf_outputs.outputs.cloudfront_id }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # No AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY anywhere in this
+      # workflow. GitHub presents a short-lived OIDC token; AWS STS checks
+      # it against the trust policy on AWS_DEPLOY_ROLE_ARN (repo + branch
+      # must match exactly - see infra/bootstrap/github_oidc.tf) and hands
+      # back temporary credentials that expire automatically.
+      - name: Configure AWS credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Terraform init
+        run: terraform init
+
+      - name: Terraform validate
+        run: terraform validate
+
+      - name: Terraform plan
+        env:
+          TF_VAR_domain_name: ${{ vars.DOMAIN_NAME }}
+          TF_VAR_contact_form_recipient_email: ${{ vars.CONTACT_FORM_RECIPIENT_EMAIL }}
+          TF_VAR_ses_sender_email: ${{ vars.SES_SENDER_EMAIL }}
+          TF_VAR_alarm_notification_email: ${{ vars.ALARM_NOTIFICATION_EMAIL }}
+        run: terraform plan -out=tfplan
+
+      - name: Terraform apply
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: terraform apply -auto-approve tfplan
+
+      - name: Capture Terraform outputs
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        id: tf_outputs
+        run: |
+          echo "s3_bucket=$(terraform output -raw s3_bucket_name)" >> "$GITHUB_OUTPUT"
+          echo "cloudfront_id=$(terraform output -raw cloudfront_distribution_id)" >> "$GITHUB_OUTPUT"
+
+  deploy-frontend:
+    name: Sync frontend + invalidate cache
+    runs-on: ubuntu-latest
+    needs: terraform
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Sync static files to S3
+        run: |
+          aws s3 sync frontend/ "s3://${{ needs.terraform.outputs.s3_bucket }}" \
+            --delete \
+            --cache-control "public, max-age=300"
+
+      - name: Invalidate CloudFront cache
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id "${{ needs.terraform.outputs.cloudfront_id }}" \
+            --paths "/*"

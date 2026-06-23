@@ -1,24 +1,29 @@
 output "site_url" {
-  description = "Your live site."
+  description = "Your live portfolio URL"
   value       = "https://${var.domain_name}"
 }
 
-output "s3_bucket_name" {
-  description = "Paste into scripts/deploy.sh / GitHub Actions secret S3_BUCKET."
-  value       = aws_s3_bucket.site.bucket
-}
-
 output "cloudfront_distribution_id" {
-  description = "Paste into scripts/deploy.sh / GitHub Actions secret CLOUDFRONT_DISTRIBUTION_ID — needed to invalidate the cache on each deploy."
+  description = "Needed by the CI/CD workflow to invalidate the cache after deploying new frontend files"
   value       = aws_cloudfront_distribution.site.id
 }
 
-output "api_endpoint" {
-  description = "Paste into site/script.js as API_ENDPOINT."
-  value       = "${aws_apigatewayv2_api.contact.api_endpoint}/contact"
+output "s3_bucket_name" {
+  description = "Needed by the CI/CD workflow to sync the frontend/ files"
+  value       = aws_s3_bucket.site.id
 }
 
-output "name_servers" {
-  description = "If create_hosted_zone = true, point your domain registrar at these."
-  value       = var.create_hosted_zone ? aws_route53_zone.this[0].name_servers : []
+output "route53_nameservers" {
+  description = "If create_route53_zone = true, point your domain registrar at these nameservers"
+  value       = var.create_route53_zone ? aws_route53_zone.primary[0].name_servers : []
+}
+
+output "contact_api_endpoint" {
+  description = "The contact form POST endpoint - this is what frontend/script.js should fetch() to"
+  value       = "${aws_apigatewayv2_api.contact_form.api_endpoint}/contact"
+}
+
+output "ses_sender_verification_note" {
+  description = "Reminder"
+  value       = "Check ${var.ses_sender_email} (and recipient, if different) inbox for an AWS SES verification email and click the link before testing the contact form."
 }

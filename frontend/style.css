@@ -244,20 +244,39 @@ a:hover, a:focus-visible { text-decoration: underline; }
 .diagram__info-body { color: var(--bp-paper-dim); }
 
 /* =========================================================
-   CERTIFICATION
+   CERTIFICATIONS — grid of repeatable cert cards
    ========================================================= */
-.cert {
-  display: flex;
-  gap: 32px;
-  align-items: center;
-  flex-wrap: wrap;
+.cert-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
 }
 
-.cert__stamp {
+.cert-card {
+  border: 1px solid var(--bp-grid);
+  border-radius: var(--radius);
+  padding: 24px;
+  background: var(--bp-panel);
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.cert-card:hover { border-color: var(--bp-amber); transform: translateY(-2px); }
+
+.cert-card--pending {
+  background: transparent;
+  border-style: dashed;
+  color: var(--bp-paper-dim);
+}
+.cert-card--pending:hover { transform: none; border-color: var(--bp-grid); }
+
+.cert-card__stamp {
   flex: 0 0 auto;
-  width: 120px;
-  height: 120px;
-  border: 3px dashed var(--bp-amber);
+  width: 80px;
+  height: 80px;
+  border: 2px dashed var(--bp-amber);
   border-radius: 50%;
   color: var(--bp-amber);
   display: flex;
@@ -266,17 +285,56 @@ a:hover, a:focus-visible { text-decoration: underline; }
   justify-content: center;
   font-family: var(--font-mono);
   font-weight: 600;
-  font-size: 13px;
+  font-size: 11px;
   letter-spacing: 0.06em;
-  transform: rotate(-6deg);
+  transform: rotate(var(--rot, -6deg));
   text-align: center;
   line-height: 1.6;
 }
 
-.cert__detail { flex: 1; min-width: 260px; }
-.cert__detail h3 { margin: 0 0 8px; font-size: 19px; }
-.cert__detail p { margin: 0 0 8px; color: var(--bp-paper-dim); max-width: 560px; }
-.cert__meta { font-family: var(--font-mono); font-size: 12px; }
+.cert-card__stamp--pending {
+  border-color: var(--bp-paper-dim);
+  color: var(--bp-paper-dim);
+  font-size: 22px;
+}
+
+.cert-card__detail { flex: 1; min-width: 0; }
+
+.cert-card__provider {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--bp-cyan);
+  margin: 0 0 6px;
+}
+.cert-card--pending .cert-card__provider { color: var(--bp-paper-dim); }
+
+.cert-card__detail h3 { margin: 0 0 8px; font-size: 16px; line-height: 1.3; }
+.cert-card__detail p  { margin: 0 0 10px; color: var(--bp-paper-dim); font-size: 13px; }
+
+.cert-card__meta {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--bp-paper-dim);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.cert-card__meta--dim { color: var(--bp-paper-dim); opacity: 0.6; }
+
+.cert-card__status {
+  color: var(--bp-amber);
+  display: inline-flex;
+  align-items: center;
+}
+
+@media (max-width: 640px) {
+  .cert-card { flex-direction: column; }
+  .cert-card__stamp { align-self: flex-start; }
+}
 
 /* =========================================================
    PROJECTS

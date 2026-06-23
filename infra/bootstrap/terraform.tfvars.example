@@ -1,0 +1,8 @@
+# Copy this file to terraform.tfvars and fill in your own values.
+# terraform.tfvars is gitignored - never commit it.
+
+aws_region        = "eu-west-2"
+state_bucket_name = "yourname-portfolio-tfstate"   # must be globally unique across all of AWS
+github_org        = "your-github-username"
+github_repo       = "portfolio"                     # must match your actual repo name exactly
+github_branch     = "main"

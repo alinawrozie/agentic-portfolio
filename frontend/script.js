@@ -1,9 +1,9 @@
 // ---------------------------------------------------------
 // CONFIG — replace after `terraform apply`:
-//   terraform output api_endpoint
+//   cd infra && terraform output contact_api_endpoint
 // e.g. "https://abc123xyz.execute-api.eu-west-2.amazonaws.com/contact"
 // ---------------------------------------------------------
-const API_ENDPOINT = "REPLACE_WITH_TERRAFORM_OUTPUT_api_endpoint";
+const API_ENDPOINT = "https://7n4e7a8tdk.execute-api.eu-west-2.amazonaws.com/contact";
 
 // ---------------------------------------------------------
 // Footer year
