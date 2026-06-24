@@ -12,7 +12,7 @@ variable "domain_name" {
 variable "create_route53_zone" {
   description = "Set true if Route 53 should create the hosted zone (first-time setup). Set false if you already have a zone and are importing it instead."
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "contact_form_recipient_email" {
