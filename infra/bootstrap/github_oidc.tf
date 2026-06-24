@@ -149,15 +149,18 @@ data "aws_iam_policy_document" "github_deploy_permissions" {
       "s3:GetBucketLocation",
       "s3:GetBucketAcl",
       "s3:GetBucketWebsite",
+      "s3:GetAccelerateConfiguration",
+      "s3:GetBucketRequestPayment",
+      "s3:GetLifecycleConfiguration",
+      "s3:GetBucketLogging",
+      "s3:GetBucketObjectLockConfiguration",
+      "s3:GetReplicationConfiguration",
+      "s3:GetBucketNotification"
     ]
-    # The site bucket is named after var.domain_name in the main config.
-    # We use a wildcard suffix so subdomains (www.*) are also covered if needed,
-    # but cannot match the state bucket (different name) or any unrelated bucket.
-    resources = ["arn:aws:s3:::*"]
-    # NOTE: this is the one statement that can't be further narrowed at bootstrap
-    # time because the site bucket name (the domain) isn't known here. The
-    # object-level statement below IS fully scoped. If you want to tighten this
-    # further after first apply, replace "*" with the exact bucket ARN.
+    resources = [
+      "arn:aws:s3:::${var.domain_name}",
+      "arn:aws:s3:::www.${var.domain_name}"
+    ]
   }
 
   statement {
@@ -169,11 +172,10 @@ data "aws_iam_policy_document" "github_deploy_permissions" {
       "s3:DeleteObject",
       "s3:GetObjectVersion",
     ]
-    # Object-level: scoped to state bucket and anything prefixed with the
-    # project name. After first apply, replace with the exact site bucket ARN.
     resources = [
       "${aws_s3_bucket.terraform_state.arn}/*",
-      "arn:aws:s3:::${var.github_repo}*/*",
+      "arn:aws:s3:::${var.domain_name}/*",
+      "arn:aws:s3:::www.${var.domain_name}/*",
     ]
   }
 
@@ -227,6 +229,7 @@ data "aws_iam_policy_document" "github_deploy_permissions" {
       "route53:CreateHostedZone",
       "route53:DeleteHostedZone",
       "route53:GetChange",
+      "route53:ListTagsForResource",
     ]
     resources = ["*"] # zone ARNs not predictable before creation
   }
@@ -277,9 +280,13 @@ data "aws_iam_policy_document" "github_deploy_permissions" {
       "lambda:TagResource",
       "lambda:ListTags",
       "lambda:PublishVersion",
+      "lambda:ListVersionsByFunction",
+      "lambda:GetFunctionCodeSigningConfig",
+      "lambda:GetFunctionConcurrency",
+      "lambda:GetFunctionEventInvokeConfig",
     ]
     resources = [
-      "arn:aws:lambda:${local.region}:${local.account_id}:function:${var.github_repo}-*",
+      "arn:aws:lambda:${local.region}:${local.account_id}:function:${var.project_name}-*",
     ]
   }
 
@@ -332,9 +339,10 @@ data "aws_iam_policy_document" "github_deploy_permissions" {
       "cloudwatch:DeleteAlarms",
       "cloudwatch:EnableAlarmActions",
       "cloudwatch:DisableAlarmActions",
+      "cloudwatch:ListTagsForResource",
     ]
     resources = [
-      "arn:aws:cloudwatch:${local.region}:${local.account_id}:alarm:${var.github_repo}-*",
+      "arn:aws:cloudwatch:${local.region}:${local.account_id}:alarm:${var.project_name}-*",
     ]
   }
 
@@ -347,15 +355,24 @@ data "aws_iam_policy_document" "github_deploy_permissions" {
     actions = [
       "logs:CreateLogGroup",
       "logs:DeleteLogGroup",
-      "logs:DescribeLogGroups",
       "logs:PutRetentionPolicy",
       "logs:ListTagsLogGroup",
       "logs:TagLogGroup",
+      "logs:ListTagsForResource",
     ]
     resources = [
-      "arn:aws:logs:${local.region}:${local.account_id}:log-group:/aws/lambda/${var.github_repo}-*",
-      "arn:aws:logs:${local.region}:${local.account_id}:log-group:/aws/apigateway/${var.github_repo}-*",
+      "arn:aws:logs:${local.region}:${local.account_id}:log-group:/aws/lambda/${var.project_name}-*",
+      "arn:aws:logs:${local.region}:${local.account_id}:log-group:/aws/apigateway/${var.project_name}-*",
     ]
+  }
+
+  statement {
+    sid    = "CloudWatchLogsGlobal"
+    effect = "Allow"
+    actions = [
+      "logs:DescribeLogGroups",
+    ]
+    resources = ["*"]
   }
 
   # ── SNS ───────────────────────────────────────────────────────────────────
@@ -372,9 +389,13 @@ data "aws_iam_policy_document" "github_deploy_permissions" {
       "sns:Unsubscribe",
       "sns:ListSubscriptionsByTopic",
       "sns:TagResource",
+      "sns:ListTagsForResource",
+      "sns:GetSubscriptionAttributes",
+      "sns:SetSubscriptionAttributes",
     ]
     resources = [
-      "arn:aws:sns:${local.region}:${local.account_id}:${var.github_repo}-*",
+      "arn:aws:sns:${local.region}:${local.account_id}:${var.project_name}-*",
+      "arn:aws:sns:${local.region}:${local.account_id}:${var.project_name}-*:*"
     ]
   }
 
@@ -402,7 +423,7 @@ data "aws_iam_policy_document" "github_deploy_permissions" {
       "iam:UntagRole",
     ]
     resources = [
-      "arn:aws:iam::${local.account_id}:role/${var.github_repo}-*",
+      "arn:aws:iam::${local.account_id}:role/${var.project_name}-*",
     ]
   }
 
@@ -411,7 +432,7 @@ data "aws_iam_policy_document" "github_deploy_permissions" {
     effect  = "Allow"
     actions = ["iam:PassRole"]
     resources = [
-      "arn:aws:iam::${local.account_id}:role/${var.github_repo}-*",
+      "arn:aws:iam::${local.account_id}:role/${var.project_name}-*",
     ]
     condition {
       test     = "StringEquals"
@@ -428,6 +449,19 @@ data "aws_iam_policy_document" "github_deploy_permissions" {
     actions = [
       "iam:GetOpenIDConnectProvider",
       "iam:ListOpenIDConnectProviders",
+    ]
+    resources = ["*"]
+  }
+
+  statement {
+    sid    = "SESReadOnly"
+    effect = "Allow"
+    actions = [
+      "ses:GetIdentityVerificationAttributes",
+      "ses:GetIdentityNotificationAttributes",
+      "ses:GetIdentityHeadersInboundEnabled",
+      "ses:GetIdentityDkimAttributes",
+      "ses:GetIdentityMailFromDomainAttributes",
     ]
     resources = ["*"]
   }

@@ -24,3 +24,15 @@ variable "github_branch" {
   type        = string
   default     = "main"
 }
+
+variable "domain_name" {
+  description = "The domain name used for the S3 site bucket (e.g. nawrozie.com). Used to scope S3 object-level IAM permissions."
+  type        = string
+}
+
+variable "project_name" {
+  description = "Short name used as a prefix for resource naming in the main config"
+  type        = string
+  default     = "portfolio"
+}
+
