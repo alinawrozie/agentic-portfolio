@@ -4,347 +4,608 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Abdul Ali Nawrozie - Cloud &amp; AI Engineer</title>
+  <title>Abdul Ali Nawrozie — Cloud & AI Engineer</title>
   <meta name="description"
-    content="Abdul Ali Nawrozie — Cloud &amp; AI Engineer portfolio. AWS Certified Solutions Architect. Projects built on production-grade AWS infrastructure.">
+    content="Portfolio of Abdul Ali Nawrozie — Cloud & AI Engineer. AWS Certified Solutions Architect Associate & MSc in Artificial Intelligence. Production-grade AWS infrastructure and AI agents.">
 
-  <!--
-  TODO before you ship this — find/replace every bracketed placeholder:
-  [Your Name]            -> your full name
-  [Your Role]            -> your title, e.g. "Cloud & DevOps Engineer"
-  [your.email@domain.com]-> your real email
-  [github-handle]        -> your GitHub username
-  [linkedin-handle]      -> your LinkedIn handle
-  [yourdomain.com]       -> your registered domain
-  API_ENDPOINT in script.js -> the API Gateway URL from `terraform output api_endpoint`
--->
-
+  <!-- Favicon / Styling -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap"
-    rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-  <div class="sheet">
+  <!-- ============ NAVBAR ============ -->
+  <header class="navbar">
+    <div class="container navbar__inner">
+      <a href="#top" class="navbar__brand">
+        <div class="brand-avatar">AN</div>
+        <div class="brand-text">
+          <span class="brand-name">ABDUL ALI NAWROZIE</span>
+          <span class="brand-title">Cloud &amp; AI Engineer</span>
+        </div>
+      </a>
 
-    <!-- ============ TITLE BLOCK ============ -->
-    <header class="title-block" id="top">
-      <div class="title-block__main">
-        <p class="title-block__eyebrow">PORTFOLIO — SHEET 01</p>
-        <h1 class="title-block__name">ABDUL ALI NAWROZIE</h1>
-        <p class="title-block__role">Cloud &amp; AI Engineer</p>
-        <p class="title-block__summary">
-          Infrastructure should be code, not archaeology.
-          I'm a Cloud & AI Engineer with a master's in Artificial Intelligence and
-          AWS certified Solutions Architect — Associate.
-          I build the AWS infrastructure that AI systems run on. This page is the proof:
-          every resource provisioned with Terraform, integrated with GitHub Actions CI/CD, no console clicks.
+      <ul class="navbar__nav">
+        <li><a href="#architecture" class="nav-link">// Architecture</a></li>
+        <!-- <li><a href="#specializations" class="nav-link">// Specializations</a></li> -->
+        <li><a href="#projects" class="nav-link">// Projects</a></li>
+        <li><a href="#certifications" class="nav-link">// Certifications</a></li>
+        <li><a href="#contact" class="nav-link">// Contact</a></li>
+      </ul>
+
+      <div class="navbar__actions">
+        <div class="system-status">
+          <span class="status-dot"></span>
+          <span>AWS System Online</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- ============ HERO SECTION ============ -->
+    <section class="container hero" id="top">
+      <div class="hero__content">
+        <div class="hero__eyebrow">
+          <span>⚡ AWS Solutions Architect</span>
+          <span>·</span>
+          <span>MSc Artificial Intelligence</span>
+        </div>
+
+        <h1 class="hero__title">
+          Architecting Scalable <span class="gradient-text">Cloud Infrastructure</span> &amp; Autonomous AI Systems.
+        </h1>
+
+        <p class="hero__subtitle">
+          Infrastructure should be code, not archaeology. I build production-grade AWS systems and deploy high-performance AI models, LLM agents, and deep learning pipelines — fully provisioned with Terraform.
         </p>
-        <nav class="title-block__links" aria-label="Profile links">
-          <!-- <a href="mailto:[EMAIL_ADDRESS]">EMAIL</a> -->
-          <a href="https://github.com/alinawrozie" target="_blank" rel="noopener">GITHUB</a>
-          <a href="https://linkedin.com/in/ali-nawrozie" target="_blank" rel="noopener">LINKEDIN</a>
-          <a href="#contact">CONTACT</a>
-        </nav>
+
+        <div class="hero__cta">
+          <a href="#projects" class="btn btn--primary">View Projects ↗</a>
+          <a href="#architecture" class="btn btn--secondary">Live Infrastructure Spec</a>
+        </div>
+
+        <div class="hero__highlights">
+          <div class="stat-item">
+            <span class="stat-val">100%</span>
+            <span class="stat-lbl">Terraform IaC</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-val">0.844</span>
+            <span class="stat-lbl">ViT Thesis ROC-AUC</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-val">AWS SAA</span>
+            <span class="stat-lbl">Certified Architect</span>
+          </div>
+        </div>
       </div>
-      <dl class="title-block__meta">
-        <div>
-          <dt>DOMAIN</dt>
-          <dd>nawrozie.com</dd>
+
+      <!-- Hero Executive Bio & Quick Spec Card -->
+      <div class="hero__spec-card">
+        <div class="bio-card">
+          <div class="bio-card__header">
+            <div class="bio-avatar">AN</div>
+            <div class="bio-info">
+              <h3 class="bio-name">Abdul Ali Nawrozie</h3>
+              <p class="bio-role">Cloud &amp; AI Engineer</p>
+            </div>
+          </div>
+
+          <div class="bio-card__details">
+            <div class="bio-item">
+              <span class="bio-item__icon">🎓</span>
+              <div class="bio-item__text">
+                <span class="bio-item__lbl">Degree</span>
+                <span class="bio-item__val">MSc Artificial Intelligence</span>
+              </div>
+            </div>
+
+            <div class="bio-item">
+              <span class="bio-item__icon">📜</span>
+              <div class="bio-item__text">
+                <span class="bio-item__lbl">AWS Credential</span>
+                <span class="bio-item__val">Solutions Architect — Associate</span>
+              </div>
+            </div>
+
+            <div class="bio-item">
+              <span class="bio-item__icon">⚡</span>
+              <div class="bio-item__text">
+                <span class="bio-item__lbl">Infrastructure</span>
+                <span class="bio-item__val">100% Terraform IaC on AWS</span>
+              </div>
+            </div>
+
+            <div class="bio-item">
+              <span class="bio-item__icon">🧠</span>
+              <div class="bio-item__text">
+                <span class="bio-item__lbl">Core Specialization</span>
+                <span class="bio-item__val">Cloud Architecture &amp; Deep Learning</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="bio-card__footer">
+            <a href="https://github.com/alinawrozie" target="_blank" rel="noopener" class="bio-social-btn">
+              <span>GitHub</span> ↗
+            </a>
+            <a href="https://linkedin.com/in/ali-nawrozie" target="_blank" rel="noopener" class="bio-social-btn">
+              <span>LinkedIn</span> ↗
+            </a>
+          </div>
         </div>
-        <div>
-          <dt>SCALE</dt>
-          <dd>1 : 1</dd>
-        </div>
-        <div>
-          <dt>REV</dt>
-          <dd>01</dd>
-        </div>
-        <div>
-          <dt>STATUS</dt>
-          <dd class="status-live"><span class="status-dot" aria-hidden="true"></span>LIVE</dd>
-        </div>
-      </dl>
-    </header>
-
-    <!-- ============ SIGNATURE: LIVE ARCHITECTURE DIAGRAM ============ -->
-    <section class="panel" id="architecture" aria-labelledby="architecture-title">
-      <h2 class="panel__label" id="architecture-title">// 01 — HOW THIS PORTFOLIO IS SERVED TO YOU, RIGHT NOW</h2>
-
-      <div class="diagram-wrap">
-        <svg class="diagram" viewBox="0 0 960 360" role="img" aria-labelledby="diagram-desc">
-          <desc id="diagram-desc">Request flow: User through Route 53, CloudFront and S3 for the page, branching to API
-            Gateway, Lambda and SES for the contact form.</desc>
-
-          <!-- grid backdrop -->
-          <g class="diagram__grid">
-            <pattern id="grid" width="24" height="24" patternUnits="userSpaceOnUse">
-              <path d="M 24 0 L 0 0 0 24" fill="none" stroke-width="1" />
-            </pattern>
-            <rect width="960" height="360" fill="url(#grid)" />
-          </g>
-
-          <!-- connectors: main path -->
-          <path class="link link--main" d="M 130 80 H 270" />
-          <path class="link link--main" d="M 390 80 H 530" />
-          <path class="link link--main" d="M 650 80 H 790" />
-          <!-- connector: branch down to the contact-form path -->
-          <path class="link link--branch" d="M 590 110 V 170 H 290 V 210" />
-          <path class="link link--branch" d="M 360 240 H 400" />
-          <path class="link link--branch" d="M 470 270 V 290" />
-
-          <!-- node: user -->
-          <g class="node" tabindex="0" data-title="Browser request"
-            data-body="You, right now — requesting this page over HTTPS.">
-            <rect x="40" y="50" width="90" height="60" rx="3" />
-            <text x="85" y="76" text-anchor="middle" class="node__title">USER</text>
-            <text x="85" y="92" text-anchor="middle" class="node__sub">your browser</text>
-          </g>
-
-          <!-- node: route53 -->
-          <g class="node" tabindex="0" data-title="Route 53"
-            data-body="Resolves nawrozie.com to the CloudFront distribution via an alias A record.">
-            <rect x="270" y="50" width="120" height="60" rx="3" />
-            <text x="330" y="76" text-anchor="middle" class="node__title">ROUTE 53</text>
-            <text x="330" y="92" text-anchor="middle" class="node__sub">DNS</text>
-          </g>
-
-          <!-- node: cloudfront -->
-          <g class="node" tabindex="0" data-title="CloudFront"
-            data-body="Terminates TLS with the ACM certificate, caches at edge locations worldwide, redirects HTTP to HTTPS.">
-            <rect x="530" y="50" width="120" height="60" rx="3" />
-            <text x="590" y="76" text-anchor="middle" class="node__title">CLOUDFRONT</text>
-            <text x="590" y="92" text-anchor="middle" class="node__sub">CDN + HTTPS</text>
-          </g>
-
-          <!-- node: s3 -->
-          <g class="node" tabindex="0" data-title="S3"
-            data-body="Stores html, css and JavaScript files. Bucket is private — only CloudFront can read it, via Origin Access Control.">
-            <rect x="790" y="50" width="120" height="60" rx="3" />
-            <text x="850" y="76" text-anchor="middle" class="node__title">S3</text>
-            <text x="850" y="92" text-anchor="middle" class="node__sub">static files</text>
-          </g>
-
-          <!-- node: api gateway -->
-          <g class="node" tabindex="0" data-title="API Gateway"
-            data-body="HTTP API — a single POST route that proxies form submissions straight to Lambda. No servers to patch.">
-            <rect x="220" y="210" width="140" height="60" rx="3" />
-            <text x="290" y="236" text-anchor="middle" class="node__title">API GATEWAY</text>
-            <text x="290" y="252" text-anchor="middle" class="node__sub">POST /contact</text>
-          </g>
-
-          <!-- node: lambda -->
-          <g class="node" tabindex="0" data-title="Lambda"
-            data-body="Python function. Validates the submitted fields, then calls the SES SendEmail API. Runs only when the form is used.">
-            <rect x="400" y="210" width="140" height="60" rx="3" />
-            <text x="470" y="236" text-anchor="middle" class="node__title">LAMBDA</text>
-            <text x="470" y="252" text-anchor="middle" class="node__sub">contact_form</text>
-          </g>
-
-          <!-- node: ses -->
-          <g class="node" tabindex="0" data-title="SES"
-            data-body="Delivers the message straight to my inbox. 62,000 free sends a month covers a portfolio many times over.">
-            <rect x="400" y="290" width="140" height="50" rx="3" />
-            <text x="470" y="313" text-anchor="middle" class="node__title">SES</text>
-            <text x="470" y="328" text-anchor="middle" class="node__sub">sends the email</text>
-          </g>
-        </svg>
-
-        <p class="diagram__info" id="diagram-info" aria-live="polite">
-          <span class="diagram__info-title">Hover or tab through the diagram</span>
-          <span class="diagram__info-body">— each node explains the role it plays in serving this exact page.</span>
-        </p>
       </div>
     </section>
 
-    <!-- ============ CERTIFICATIONS ============ -->
-    <!--
-    TO ADD A CERTIFICATION: duplicate one <article class="cert-card"> block.
-    TO REMOVE ONE: delete the block.
-    Stamp rotation is set per-card via --rot so they don't all tilt the same way.
-  -->
-    <section class="panel" id="certifications" aria-labelledby="cert-title">
-      <h2 class="panel__label" id="cert-title">// 02 — CERTIFICATIONS</h2>
-      <div class="cert-grid">
+    <!-- ============ ARCHITECTURE SECTION ============ -->
+    <section class="section" id="architecture">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-tag">// 01 — Live AWS System Architecture</span>
+          <h2 class="section-title">How This Portfolio Is Served To You</h2>
+          <p class="section-desc">
+            Zero console clicks. Every resource powering this exact page is provisioned using Terraform infrastructure as code, cached globally via CloudFront, and served serverlessly.
+          </p>
+        </div>
 
-        <article class="cert-card">
-          <div class="cert-card__stamp" aria-hidden="true" style="--rot: -6deg">
-            <span>AWS</span>
-            <span>CERTIFIED</span>
+        <div class="arch-card">
+          <div class="diagram-svg-wrap">
+            <svg class="arch-svg" viewBox="0 0 960 340" role="img" aria-labelledby="diag-title">
+              <title id="diag-title">AWS Serverless Portfolio Architecture Diagram</title>
+
+              <!-- Grid pattern -->
+              <g class="svg-grid">
+                <pattern id="grid-pat" width="30" height="30" patternUnits="userSpaceOnUse">
+                  <path d="M 30 0 L 0 0 0 30" fill="none" stroke-width="1" />
+                </pattern>
+                <rect width="960" height="340" fill="url(#grid-pat)" />
+              </g>
+
+              <!-- Flow Connectors -->
+              <path class="arch-link arch-link--main" d="M 130 90 H 260" />
+              <path class="arch-link arch-link--main" d="M 390 90 H 520" />
+              <path class="arch-link arch-link--main" d="M 650 90 H 780" />
+              
+              <path class="arch-link arch-link--branch" d="M 580 120 V 180 H 290 V 210" />
+              <path class="arch-link arch-link--branch" d="M 360 240 H 430" />
+              <path class="arch-link arch-link--branch" d="M 500 270 V 290" />
+
+              <!-- Node: User -->
+              <g class="arch-node active" tabindex="0" data-title="Client Browser" data-icon="💻"
+                data-body="You, right now. Requesting static assets over HTTPS with TLS termination at the edge.">
+                <rect x="30" y="60" width="100" height="60" />
+                <text x="80" y="88" text-anchor="middle" class="n-title">USER</text>
+                <text x="80" y="104" text-anchor="middle" class="n-sub">Browser</text>
+              </g>
+
+              <!-- Node: Route 53 -->
+              <g class="arch-node" tabindex="0" data-title="AWS Route 53" data-icon="🌐"
+                data-body="DNS routing. Resolves nawrozie.com via an Alias A-record to CloudFront CDN endpoints worldwide with latency routing.">
+                <rect x="260" y="60" width="130" height="60" />
+                <text x="325" y="88" text-anchor="middle" class="n-title">ROUTE 53</text>
+                <text x="325" y="104" text-anchor="middle" class="n-sub">DNS Service</text>
+              </g>
+
+              <!-- Node: CloudFront -->
+              <g class="arch-node" tabindex="0" data-title="AWS CloudFront" data-icon="⚡"
+                data-body="Global Edge CDN. Terminates SSL/TLS using AWS ACM Certificate, caches static assets, and enforces HTTPS redirection.">
+                <rect x="520" y="60" width="130" height="60" />
+                <text x="585" y="88" text-anchor="middle" class="n-title">CLOUDFRONT</text>
+                <text x="585" y="104" text-anchor="middle" class="n-sub">CDN + HTTPS</text>
+              </g>
+
+              <!-- Node: S3 -->
+              <g class="arch-node" tabindex="0" data-title="AWS S3 (Private Bucket)" data-icon="🪣"
+                data-body="Origin storage for HTML, CSS, JS. Private bucket access restricted strictly to CloudFront via Origin Access Control (OAC).">
+                <rect x="780" y="60" width="130" height="60" />
+                <text x="845" y="88" text-anchor="middle" class="n-title">AWS S3</text>
+                <text x="845" y="104" text-anchor="middle" class="n-sub">Static Origin</text>
+              </g>
+
+              <!-- Node: API Gateway -->
+              <g class="arch-node" tabindex="0" data-title="Amazon API Gateway" data-icon="🚪"
+                data-body="HTTP REST API proxying form submissions to AWS Lambda. Fully serverless with zero server maintenance.">
+                <rect x="220" y="210" width="140" height="60" />
+                <text x="290" y="238" text-anchor="middle" class="n-title">API GATEWAY</text>
+                <text x="290" y="254" text-anchor="middle" class="n-sub">POST /contact</text>
+              </g>
+
+              <!-- Node: Lambda -->
+              <g class="arch-node" tabindex="0" data-title="AWS Lambda" data-icon="ƛ"
+                data-body="Python 3.12 handler. Validates payload fields, enforces sanitization, and calls Amazon SES SendEmail API.">
+                <rect x="430" y="210" width="140" height="60" />
+                <text x="500" y="238" text-anchor="middle" class="n-title">AWS LAMBDA</text>
+                <text x="500" y="254" text-anchor="middle" class="n-sub">contact_form</text>
+              </g>
+
+              <!-- Node: SES -->
+              <g class="arch-node" tabindex="0" data-title="Amazon SES" data-icon="✉️"
+                data-body="Simple Email Service. Delivers verified messages directly to my inbox with instant cloud notifications.">
+                <rect x="430" y="290" width="140" height="45" />
+                <text x="500" y="318" text-anchor="middle" class="n-title">AMAZON SES</text>
+              </g>
+            </svg>
           </div>
-          <div class="cert-card__detail">
-            <p class="cert-card__provider">Amazon Web Services</p>
-            <h3>AWS Certified Solutions Architect — Associate</h3>
-            <p>Validates the ability to design distributed systems on AWS: this site's
-              DNS, CDN, storage, compute and email layers are an applied example
-              of that, not a study exercise.</p>
-            <p class="cert-card__meta">
-              <span class="cert-card__status"><span class="status-dot" aria-hidden="true"></span>ACTIVE</span>
-              · Issued Jun 2026
-              · <a href="https://www.credly.com/badges/66378ed1-8e94-4ab7-a8a3-b630b1b78446/public_url" target="_blank"
-                rel="noopener">Verify →</a>
+
+          <!-- Inspector Panel -->
+          <div class="inspector-panel" id="inspector">
+            <div class="inspector-icon" id="inspector-icon">💻</div>
+            <div class="inspector-content">
+              <div class="inspector-title" id="inspector-title">Client Browser (You)</div>
+              <div class="inspector-body" id="inspector-body">
+                Hover or click any architectural node above to inspect its exact role, security policies, and AWS service configuration.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SPECIALIZATIONS SECTION (HIDDEN) ============
+    <section class="section" id="specializations">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-tag">// 02 — Core Engineering Capabilities</span>
+          <h2 class="section-title">Specialized Skill Matrix</h2>
+          <p class="section-desc">
+            Combining academic AI research with enterprise-level AWS cloud architecture to deliver autonomous agentic workflows and production ML models.
+          </p>
+        </div>
+
+        <div class="skills-grid">
+          <div class="skill-card">
+            <div class="skill-card__icon">🤖</div>
+            <h3 class="skill-card__title">Agentic AI &amp; LLM Systems</h3>
+            <p class="skill-card__desc">
+              Building autonomous AI agents using Google ADK &amp; Gemini. Implementing ReAct decision loops, multi-layer PII scrubbing, prompt injection guardrails, and human-in-the-loop audit workflows.
             </p>
+            <div class="skill-card__tags">
+              <span class="tech-tag">Google ADK</span>
+              <span class="tech-tag">Gemini API</span>
+              <span class="tech-tag">ReAct Agents</span>
+              <span class="tech-tag">FastAPI</span>
+              <span class="tech-tag">Structured Output</span>
+            </div>
           </div>
-        </article>
 
-        <article class="cert-card">
-          <div class="cert-card__stamp" aria-hidden="true" style="--rot: 5deg">
-            <span>AWS</span>
-            <span>CERTIFIED</span>
-          </div>
-          <div class="cert-card__detail">
-            <p class="cert-card__provider">Amazon Web Services</p>
-            <h3>AWS Certified Cloud Practitioner</h3>
-            <p>Foundation-level certification covering AWS global infrastructure,
-              core services, security, and cloud economics.</p>
-            <p class="cert-card__meta">
-              <span class="cert-card__status"><span class="status-dot" aria-hidden="true"></span>ACTIVE</span>
-              · Issued Nov 2025
-              · <a href="https://www.credly.com/badges/fe121f4e-ef1b-4c82-a592-34f5b2ce2f08/public_url" target="_blank"
-                rel="noopener">Verify →</a>
+          <div class="skill-card">
+            <div class="skill-card__icon">☁️</div>
+            <h3 class="skill-card__title">Cloud &amp; IaC Architecture</h3>
+            <p class="skill-card__desc">
+              Designing immutable AWS infrastructure. Production experience with Terraform, S3 Origin Access Control, CloudFront Edge caching, Lambda serverless microservices, and GitHub Actions OIDC pipelines.
             </p>
+            <div class="skill-card__tags">
+              <span class="tech-tag">AWS Solutions Architect</span>
+              <span class="tech-tag">Terraform</span>
+              <span class="tech-tag">CloudFront</span>
+              <span class="tech-tag">Lambda</span>
+              <span class="tech-tag">GitHub Actions</span>
+            </div>
           </div>
-        </article>
 
-        <article class="cert-card">
-          <div class="cert-card__stamp" aria-hidden="true" style="--rot: -4deg">
-            <span>PY</span>
-            <span>THON</span>
-          </div>
-          <div class="cert-card__detail">
-            <p class="cert-card__provider">University of Michigan</p>
-            <h3>Programming for Everybody (Python)</h3>
-            <p>Validated foundational proficiency in Python, including data structures
-              and core programming logic.</p>
-            <p class="cert-card__meta">
-              <span class="cert-card__status"><span class="status-dot" aria-hidden="true"></span>ACTIVE</span>
-              · Issued Aug 2024
-              · <a href="https://coursera.org/share/c441a72fb8b3980e2509873db81224d2" target="_blank"
-                rel="noopener">Verify →</a>
+          <div class="skill-card">
+            <div class="skill-card__icon">👁️</div>
+            <h3 class="skill-card__title">Computer Vision &amp; Deep Learning</h3>
+            <p class="skill-card__desc">
+              Evaluated Vision Transformers (ViT) vs CNNs (EfficientNet, VGG16) for medical image classification. Skilled in PyTorch, TensorFlow, TFRecord pipelines, and custom data augmentations.
             </p>
+            <div class="skill-card__tags">
+              <span class="tech-tag">Vision Transformers</span>
+              <span class="tech-tag">PyTorch</span>
+              <span class="tech-tag">TensorFlow</span>
+              <span class="tech-tag">Cross-Validation</span>
+              <span class="tech-tag">ISIC Dataset</span>
+            </div>
           </div>
-        </article>
 
+          <div class="skill-card">
+            <div class="skill-card__icon">📊</div>
+            <h3 class="skill-card__title">Predictive ML &amp; Time-Series</h3>
+            <p class="skill-card__desc">
+              Engineering end-to-end forecasting pipelines. Created renewable energy surplus forecasters with LSTMs + XGBoost and retail sales predictors with LightGBM target-encoding ensembles.
+            </p>
+            <div class="skill-card__tags">
+              <span class="tech-tag">XGBoost</span>
+              <span class="tech-tag">LightGBM</span>
+              <span class="tech-tag">LSTMs</span>
+              <span class="tech-tag">Pandas</span>
+              <span class="tech-tag">Scikit-Learn</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    ======================================================== -->
+
+    <!-- ============ PROJECTS SECTION ============ -->
+    <section class="section" id="projects">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-tag">// 03 — Featured Work</span>
+          <h2 class="section-title">Projects &amp; Machine Learning Systems</h2>
+          <p class="section-desc">
+            Production cloud deployments, published research codebases, and autonomous AI agents.
+          </p>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="filter-bar">
+          <button class="filter-btn active" data-filter="all">All Projects</button>
+          <button class="filter-btn" data-filter="ai-agents">AI &amp; Agents</button>
+          <button class="filter-btn" data-filter="deep-learning">Deep Learning</button>
+          <button class="filter-btn" data-filter="cloud">Cloud IaC</button>
+          <button class="filter-btn" data-filter="predictive-ml">Predictive ML</button>
+        </div>
+
+        <div class="projects-grid">
+          <!-- Project 1 -->
+          <article class="project-card" data-category="cloud">
+            <div class="project-header">
+              <span class="project-category">Cloud IaC</span>
+              <span class="metric-badge">100% Terraform</span>
+            </div>
+            <h3 class="project-title">AWS Serverless Portfolio Infrastructure</h3>
+            <p class="project-desc">
+              Statically hosted on private S3, distributed through CloudFront CDN with TLS termination, Route 53 DNS, and a serverless backend on API Gateway + Lambda + SES. Fully defined in Terraform without manual console setup.
+            </p>
+            <div class="project-stack">
+              <span class="tech-tag">Route 53</span>
+              <span class="tech-tag">CloudFront</span>
+              <span class="tech-tag">S3</span>
+              <span class="tech-tag">Lambda</span>
+              <span class="tech-tag">SES</span>
+              <span class="tech-tag">Terraform</span>
+            </div>
+            <a href="https://github.com/alinawrozie/agentic-portfolio" target="_blank" rel="noopener" class="project-link">
+              View Source Code ↗
+            </a>
+          </article>
+
+          <!-- Project 2 -->
+          <article class="project-card" data-category="ai-agents">
+            <div class="project-header">
+              <span class="project-category">AI Agents</span>
+              <span class="metric-badge">Google ADK + Gemini</span>
+            </div>
+            <h3 class="project-title">Ambient Expense Agent</h3>
+            <p class="project-desc">
+              Production-grade ReAct agent built with Google Agent Development Kit (ADK). Automates corporate expense compliance auditing with dual-layer security checkpoints (PII scrubbing + prompt injection guardrails) and Human-in-the-Loop workflows.
+            </p>
+            <div class="project-stack">
+              <span class="tech-tag">Google ADK</span>
+              <span class="tech-tag">Gemini API</span>
+              <span class="tech-tag">FastAPI</span>
+              <span class="tech-tag">Pydantic</span>
+              <span class="tech-tag">Structured Output</span>
+            </div>
+            <a href="https://github.com/alinawrozie/ambient-expense-agent" target="_blank" rel="noopener" class="project-link">
+              View Source Code ↗
+            </a>
+          </article>
+
+          <!-- Project 3 -->
+          <article class="project-card" data-category="deep-learning">
+            <div class="project-header">
+              <span class="project-category">Deep Learning</span>
+              <span class="metric-badge">ROC-AUC: 0.844</span>
+            </div>
+            <h3 class="project-title">Skin Cancer Classification (ViT vs CNN)</h3>
+            <p class="project-desc">
+              Master's thesis research evaluating Vision Transformers (ViT) against CNN benchmarks (VGG16, EfficientNetV2-B1) on the ISIC 2017 dataset. Features 5-fold cross-validation, custom augmentations, and optimized TFRecord pipelines.
+            </p>
+            <div class="project-stack">
+              <span class="tech-tag">Vision Transformers</span>
+              <span class="tech-tag">CNNs</span>
+              <span class="tech-tag">PyTorch</span>
+              <span class="tech-tag">TensorFlow</span>
+              <span class="tech-tag">Python</span>
+            </div>
+            <a href="https://github.com/alinawrozie/skin-cancer-classification" target="_blank" rel="noopener" class="project-link">
+              View Source Code ↗
+            </a>
+          </article>
+
+          <!-- Project 4 -->
+          <article class="project-card" data-category="predictive-ml">
+            <div class="project-header">
+              <span class="project-category">Predictive ML</span>
+              <span class="metric-badge">LSTM + XGBoost</span>
+            </div>
+            <h3 class="project-title">Renewable Energy Surplus Forecaster</h3>
+            <p class="project-desc">
+              End-to-end forecasting pipeline predicting wind and solar energy surplus 24 hours ahead. Built with temporal LSTMs and XGBoost, integrated with a financial cost-minimization framework for local electricity tariff optimization.
+            </p>
+            <div class="project-stack">
+              <span class="tech-tag">LSTM</span>
+              <span class="tech-tag">XGBoost</span>
+              <span class="tech-tag">Keras</span>
+              <span class="tech-tag">Python</span>
+              <span class="tech-tag">Pandas</span>
+            </div>
+            <a href="https://github.com/alinawrozie/renewable-energy-surplus-forecasting" target="_blank" rel="noopener" class="project-link">
+              View Source Code ↗
+            </a>
+          </article>
+
+          <!-- Project 5 -->
+          <article class="project-card" data-category="predictive-ml">
+            <div class="project-header">
+              <span class="project-category">Predictive ML</span>
+              <span class="metric-badge">RMSPE: 0.116</span>
+            </div>
+            <h3 class="project-title">Rossmann Store Sales Forecasting</h3>
+            <p class="project-desc">
+              Kaggle competition pipeline predicting daily sales across 1,115 pharmacies in Germany. Blended XGBoost + LightGBM ensemble with target encoding and closed-store heuristics achieving top-tier leaderboard performance.
+            </p>
+            <div class="project-stack">
+              <span class="tech-tag">XGBoost</span>
+              <span class="tech-tag">LightGBM</span>
+              <span class="tech-tag">Ensemble</span>
+              <span class="tech-tag">Python</span>
+              <span class="tech-tag">Scikit-Learn</span>
+            </div>
+            <a href="https://github.com/alinawrozie/rossmann-store-sales-forecasting" target="_blank" rel="noopener" class="project-link">
+              View Source Code ↗
+            </a>
+          </article>
+        </div>
       </div>
     </section>
 
-    <!-- ============ PROJECTS ============ -->
-    <section class="panel" id="projects" aria-labelledby="projects-title">
-      <h2 class="panel__label" id="projects-title">// 03 — PROJECTS</h2>
-      <div class="projects-grid">
+    <!-- ============ CERTIFICATIONS SECTION ============ -->
+    <section class="section" id="certifications">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-tag">// 04 — Verified Credentials</span>
+          <h2 class="section-title">Certifications &amp; Degrees</h2>
+          <p class="section-desc">
+            Formally validated cloud architecture expertise and software engineering credentials.
+          </p>
+        </div>
 
-        <article class="project-card">
-          <p class="project-card__tag">LIVE</p>
-          <h3>This portfolio</h3>
-          <p>Statically hosted on S3, distributed through CloudFront with a free
-            ACM certificate, routed by Route 53, with a serverless contact form
-            on API Gateway, Lambda and SES. Infrastructure is fully defined in
-            Terraform — nothing was clicked in a console.</p>
-          <div class="project-card__stack">
-            <span>Route 53</span><span>CloudFront</span><span>S3</span>
-            <span>Lambda</span><span>SES</span><span>Terraform</span>
-          </div>
-          <a class="project-card__link" href="https://github.com/alinawrozie/agentic-portfolio" target="_blank"
-            rel="noopener">View source →</a>
-        </article>
+        <div class="certs-grid">
+          <!-- Cert 1 -->
+          <article class="cert-card">
+            <div class="cert-stamp">
+              <span>AWS</span>
+              <span>SAA</span>
+            </div>
+            <div class="cert-body">
+              <div class="cert-issuer">Amazon Web Services</div>
+              <h3 class="cert-title">AWS Certified Solutions Architect — Associate</h3>
+              <p class="cert-desc">
+                Validates advanced capability in designing resilient, high-performing, cost-optimized cloud architectures on AWS.
+              </p>
+              <div class="cert-meta">
+                <span class="cert-status">● Active</span>
+                <span>· Issued Jun 2026</span>
+                <span>· <a href="https://www.credly.com/badges/66378ed1-8e94-4ab7-a8a3-b630b1b78446/public_url" target="_blank" rel="noopener">Verify Badge ↗</a></span>
+              </div>
+            </div>
+          </article>
 
+          <!-- Cert 2 -->
+          <article class="cert-card">
+            <div class="cert-stamp">
+              <span>AWS</span>
+              <span>CCP</span>
+            </div>
+            <div class="cert-body">
+              <div class="cert-issuer">Amazon Web Services</div>
+              <h3 class="cert-title">AWS Certified Cloud Practitioner</h3>
+              <p class="cert-desc">
+                Foundational certification covering AWS global cloud infrastructure, core services, cloud security, and financial optimization.
+              </p>
+              <div class="cert-meta">
+                <span class="cert-status">● Active</span>
+                <span>· Issued Nov 2025</span>
+                <span>· <a href="https://www.credly.com/badges/fe121f4e-ef1b-4c82-a592-34f5b2ce2f08/public_url" target="_blank" rel="noopener">Verify Badge ↗</a></span>
+              </div>
+            </div>
+          </article>
 
-        <article class="project-card">
-          <p class="project-card__tag">DEEP LEARNING</p>
-          <h3>Skin Cancer Classification</h3>
-          <p>Master's thesis evaluating Vision Transformers (ViTs) against CNNs (VGG16, EfficientNetV2-B1) on the ISIC
-            2017 dataset. Implemented 5-fold cross-validation, custom data augmentations, and TFRecord pipelines. The
-            ViT model achieved a peak ROC-AUC of 0.844.</p>
-          <div class="project-card__stack">
-            <span>Vision Transformers</span><span>CNNs</span><span>PyTorch</span>
-            <span>TensorFlow</span><span>Python</span>
-          </div>
-          <a class="project-card__link" href="https://github.com/alinawrozie/skin-cancer-classification" target="_blank"
-            rel="noopener">View source →</a>
-        </article>
-        <article class="project-card">
-          <p class="project-card__tag">MACHINE LEARNING</p>
-          <h3>Renewable Energy Forecaster</h3>
-          <p>An end-to-end forecasting pipeline predicting wind and solar energy surplus 24 hours ahead. Built with
-            temporal
-            LSTMs and XGBoost, and integrated with a financial cost-minimization framework to safely offer free local
-            electricity tariffs while mitigating spot-market deficit risks.</p>
-          <div class="project-card__stack">
-            <span>LSTM</span><span>XGBoost</span><span>Keras</span>
-            <span>Python</span><span>Pandas</span><span>Scikit-Learn</span>
-          </div>
-          <a class="project-card__link" href="https://github.com/alinawrozie/renewable-energy-surplus-forecasting"
-            target="_blank" rel="noopener">View source →</a>
-        </article>
-        <article class="project-card">
-          <p class="project-card__tag">MACHINE LEARNING</p>
-          <h3>Rossmann Store Sales Forecasting</h3>
-          <p>Kaggle competition pipeline predicting daily sales for 1,115 Rossmann pharmacies across Germany.
-            A blended XGBoost + LightGBM ensemble with advanced feature engineering (target encoding,
-            log-transformation)
-            and a closed-store heuristic achieved a public RMSPE of <strong>0.116</strong> — top-tier on the
-            leaderboard.</p>
-          <div class="project-card__stack">
-            <span>XGBoost</span><span>LightGBM</span><span>Ensemble</span>
-            <span>Python</span><span>Pandas</span><span>Scikit-Learn</span>
-          </div>
-          <a class="project-card__link" href="https://github.com/alinawrozie/rossmann-store-sales-forecasting"
-            target="_blank" rel="noopener">View source →</a>
-        </article>
-        <article class="project-card">
-          <p class="project-card__tag">AI AGENTS</p>
-          <h3>Ambient Expense Agent</h3>
-          <p>A production-grade ReAct agent built with the Google Agent Development Kit (ADK) that automates expense compliance auditing. Features standard policy thresholds, a dual-layer security checkpoint (PII scrubbing + prompt injection guardrails), deep LLM policy review powered by Gemini, and real-time Human-in-the-Loop approval workflows.</p>
-          <div class="project-card__stack">
-            <span>Google ADK</span><span>Gemini</span><span>FastAPI</span>
-            <span>Python</span><span>Pydantic</span><span>Structured Output</span>
-          </div>
-          <a class="project-card__link" href="https://github.com/alinawrozie/ambient-expense-agent" target="_blank"
-            rel="noopener">View source →</a>
-        </article>
-        <!--
-        <article class="project-card project-card--empty">
-          <p class="project-card__tag">NEXT</p>
-          <h3>Project 3</h3>
-          <p>Reserved. Replace this card when the next build ships.</p>
-        </article>
-        -->
+          <!-- Cert 3 -->
+          <article class="cert-card">
+            <div class="cert-stamp">
+              <span>PY</span>
+              <span>THON</span>
+            </div>
+            <div class="cert-body">
+              <div class="cert-issuer">University of Michigan</div>
+              <h3 class="cert-title">Programming for Everybody (Python)</h3>
+              <p class="cert-desc">
+                Validated foundational proficiency in Python, object-oriented programming, data structures, and algorithms.
+              </p>
+              <div class="cert-meta">
+                <span class="cert-status">● Active</span>
+                <span>· Issued Aug 2024</span>
+                <span>· <a href="https://coursera.org/share/c441a72fb8b3980e2509873db81224d2" target="_blank" rel="noopener">Verify Certificate ↗</a></span>
+              </div>
+            </div>
+          </article>
+        </div>
       </div>
     </section>
 
-    <!-- ============ CONTACT ============ -->
-    <section class="panel" id="contact" aria-labelledby="contact-title">
-      <h2 class="panel__label" id="contact-title">// 04 — SEND A MESSAGE</h2>
-      <form class="contact-form" id="contact-form" novalidate>
-        <div class="field">
-          <label for="name">NAME</label>
-          <input type="text" id="name" name="name" required autocomplete="name">
+    <!-- ============ CONTACT SECTION ============ -->
+    <section class="section" id="contact">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-tag">// 05 — Direct Channel</span>
+          <h2 class="section-title">Get In Touch</h2>
+          <p class="section-desc">
+            Interested in collaboration, cloud architecture consulting, or AI engineering roles? Transmit a message via serverless API.
+          </p>
         </div>
-        <div class="field">
-          <label for="email">EMAIL</label>
-          <input type="email" id="email" name="email" required autocomplete="email">
+
+        <div class="contact-wrap">
+          <div class="contact-info">
+            <div class="contact-methods">
+              <div class="contact-item">
+                <div class="contact-item__icon">🌐</div>
+                <div class="contact-item__text">
+                  <h4>GitHub Profile</h4>
+                  <a href="https://github.com/alinawrozie" target="_blank" rel="noopener">github.com/alinawrozie</a>
+                </div>
+              </div>
+
+              <div class="contact-item">
+                <div class="contact-item__icon">💼</div>
+                <div class="contact-item__text">
+                  <h4>LinkedIn Network</h4>
+                  <a href="https://linkedin.com/in/ali-nawrozie" target="_blank" rel="noopener">linkedin.com/in/ali-nawrozie</a>
+                </div>
+              </div>
+
+              <div class="contact-item">
+                <div class="contact-item__icon">⚡</div>
+                <div class="contact-item__text">
+                  <h4>Infrastructure Spec</h4>
+                  <p>Route 53 + CloudFront + S3 + Lambda + SES</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Contact Form -->
+          <form class="contact-form" id="contact-form" novalidate>
+            <div class="form-group">
+              <label for="name">Your Name</label>
+              <input type="text" id="name" name="name" class="form-control" placeholder="e.g. Jane Doe" required autocomplete="name">
+            </div>
+
+            <div class="form-group">
+              <label for="email">Your Email</label>
+              <input type="email" id="email" name="email" class="form-control" placeholder="jane@example.com" required autocomplete="email">
+            </div>
+
+            <div class="form-group">
+              <label for="message">Message</label>
+              <textarea id="message" name="message" class="form-control" rows="4" placeholder="How can I help with your cloud or AI project?" required></textarea>
+            </div>
+
+            <button type="submit" id="contact-submit" class="btn btn--primary" style="width: 100%; justify-content: center;">
+              <span>Transmit Message</span> ➔
+            </button>
+
+            <p class="form-status" id="contact-status" role="status" aria-live="polite"></p>
+          </form>
         </div>
-        <div class="field">
-          <label for="message">MESSAGE</label>
-          <textarea id="message" name="message" rows="5" required></textarea>
-        </div>
-        <button type="submit" id="contact-submit">
-          <span class="status-dot status-dot--idle" aria-hidden="true"></span>
-          TRANSMIT
-        </button>
-        <p class="contact-form__status" id="contact-status" role="status" aria-live="polite"></p>
-      </form>
+      </div>
     </section>
+  </main>
 
-    <footer class="footer">
-      <p>Abdul Ali Nawrozie · Built with Terraform on AWS · <span id="year"></span></p>
-    </footer>
-
-  </div>
+  <!-- ============ FOOTER ============ -->
+  <footer class="footer">
+    <div class="container footer__inner">
+      <p class="footer-text">
+        © <span id="year"></span> Abdul Ali Nawrozie · Built with Terraform on AWS · All rights reserved.
+      </p>
+    </div>
+  </footer>
 
   <script src="script.js"></script>
 </body>

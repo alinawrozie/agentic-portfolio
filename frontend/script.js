@@ -1,91 +1,150 @@
 // ---------------------------------------------------------
-// CONFIG — replace after `terraform apply`:
-//   cd infra && terraform output contact_api_endpoint
-// e.g. "https://abc123xyz.execute-api.eu-west-2.amazonaws.com/contact"
+// CONFIG — API Gateway endpoint for contact form:
 // ---------------------------------------------------------
 const API_ENDPOINT = "https://7n4e7a8tdk.execute-api.eu-west-2.amazonaws.com/contact";
 
 // ---------------------------------------------------------
-// Footer year
+// Footer year auto-update
 // ---------------------------------------------------------
-document.getElementById("year").textContent = new Date().getFullYear();
+const yearEl = document.getElementById("year");
+if (yearEl) {
+  yearEl.textContent = new Date().getFullYear();
+}
 
 // ---------------------------------------------------------
-// Architecture diagram — hover/focus reveals what each
-// node does, for both mouse and keyboard users.
+// AWS Architecture Diagram — Node Inspector
 // ---------------------------------------------------------
-const infoTitle = document.querySelector(".diagram__info-title");
-const infoBody = document.querySelector(".diagram__info-body");
-const defaultTitle = infoTitle ? infoTitle.textContent : "";
-const defaultBody = infoBody ? infoBody.textContent : "";
+const inspectorIcon = document.getElementById("inspector-icon");
+const inspectorTitle = document.getElementById("inspector-title");
+const inspectorBody = document.getElementById("inspector-body");
 
-document.querySelectorAll(".node").forEach((node) => {
-  const show = () => {
-    infoTitle.textContent = node.dataset.title + " — ";
-    infoBody.textContent = node.dataset.body;
+const defaultInspector = {
+  icon: "💻",
+  title: "Client Browser (You)",
+  body: "Hover or click any architectural node above to inspect its exact role, security policies, and AWS service configuration."
+};
+
+const archNodes = document.querySelectorAll(".arch-node");
+
+archNodes.forEach((node) => {
+  const updateInspector = () => {
+    archNodes.forEach(n => n.classList.remove("active"));
+    node.classList.add("active");
+    
+    if (inspectorIcon) inspectorIcon.textContent = node.dataset.icon || "⚡";
+    if (inspectorTitle) inspectorTitle.textContent = node.dataset.title || "AWS Node";
+    if (inspectorBody) inspectorBody.textContent = node.dataset.body || "";
   };
-  const reset = () => {
-    infoTitle.textContent = defaultTitle;
-    infoBody.textContent = defaultBody;
-  };
-  node.addEventListener("mouseenter", show);
-  node.addEventListener("focus", show);
-  node.addEventListener("mouseleave", reset);
-  node.addEventListener("blur", reset);
+
+  node.addEventListener("mouseenter", updateInspector);
+  node.addEventListener("focus", updateInspector);
+  node.addEventListener("click", updateInspector);
+
+  node.addEventListener("mouseleave", () => {
+    // Retain node active state if clicked, or reset to default
+  });
 });
 
 // ---------------------------------------------------------
-// Contact form — POSTs to the API Gateway HTTP API, which
-// proxies to Lambda, which calls SES. See lambda/contact_form.
+// Projects Category Filter
+// ---------------------------------------------------------
+const filterBtns = document.querySelectorAll(".filter-btn");
+const projectCards = document.querySelectorAll(".project-card");
+
+filterBtns.forEach(btn => {
+  btn.addEventListener("click", () => {
+    filterBtns.forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+
+    const filter = btn.dataset.filter;
+
+    projectCards.forEach(card => {
+      if (filter === "all" || card.dataset.category === filter) {
+        card.classList.remove("hidden");
+      } else {
+        card.classList.add("hidden");
+      }
+    });
+  });
+});
+
+// ---------------------------------------------------------
+// Contact Form Submission (POST to API Gateway -> Lambda -> SES)
 // ---------------------------------------------------------
 const form = document.getElementById("contact-form");
 const submitButton = document.getElementById("contact-submit");
 const statusEl = document.getElementById("contact-status");
-const statusDot = submitButton.querySelector(".status-dot");
 
-function setState(state, message) {
-  statusDot.className = "status-dot status-dot--" + state;
+function setFormState(state, message) {
+  if (!statusEl) return;
+  statusEl.className = "form-status status--" + state;
   statusEl.textContent = message || "";
 }
 
-form.addEventListener("submit", async (event) => {
-  event.preventDefault();
+if (form) {
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
 
-  if (API_ENDPOINT.startsWith("REPLACE_WITH")) {
-    setState("error", "API endpoint not configured yet — see script.js.");
-    return;
-  }
-
-  const payload = {
-    name: form.name.value.trim(),
-    email: form.email.value.trim(),
-    message: form.message.value.trim(),
-  };
-
-  if (!payload.name || !payload.email || !payload.message) {
-    setState("error", "Fill in every field before sending.");
-    return;
-  }
-
-  submitButton.disabled = true;
-  setState("sending", "Sending…");
-
-  try {
-    const response = await fetch(API_ENDPOINT, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-
-    if (!response.ok) {
-      throw new Error("Request failed with status " + response.status);
+    if (API_ENDPOINT.includes("REPLACE_WITH")) {
+      setFormState("error", "API Gateway endpoint not configured yet.");
+      return;
     }
 
-    setState("success", "Sent. I'll reply by email shortly.");
-    form.reset();
-  } catch (err) {
-    setState("error", "Something went wrong — try again, or email me directly.");
-  } finally {
-    submitButton.disabled = false;
-  }
+    const payload = {
+      name: form.name.value.trim(),
+      email: form.email.value.trim(),
+      message: form.message.value.trim(),
+    };
+
+    if (!payload.name || !payload.email || !payload.message) {
+      setFormState("error", "Please fill in all required fields before transmitting.");
+      return;
+    }
+
+    submitButton.disabled = true;
+    setFormState("sending", "Transmitting message to AWS Lambda serverless handler…");
+
+    try {
+      const response = await fetch(API_ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        throw new Error("API returned status " + response.status);
+      }
+
+      setFormState("success", "✓ Message transmitted successfully! I will reply to your email shortly.");
+      form.reset();
+    } catch (err) {
+      console.error(err);
+      setFormState("error", "✕ Transmission failed. Please try again or reach out via LinkedIn/GitHub.");
+    } finally {
+      submitButton.disabled = false;
+    }
+  });
+}
+
+// ---------------------------------------------------------
+// Navbar Active Spy on Scroll
+// ---------------------------------------------------------
+const navLinks = document.querySelectorAll(".nav-link");
+const sections = document.querySelectorAll("section[id]");
+
+window.addEventListener("scroll", () => {
+  let current = "";
+  sections.forEach(section => {
+    const sectionTop = section.offsetTop - 100;
+    if (window.scrollY >= sectionTop) {
+      current = section.getAttribute("id");
+    }
+  });
+
+  navLinks.forEach(link => {
+    link.classList.remove("active");
+    if (link.getAttribute("href") === `#${current}`) {
+      link.classList.add("active");
+    }
+  });
 });
