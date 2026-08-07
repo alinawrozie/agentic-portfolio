@@ -17,3 +17,4 @@ infra/build/
 *.swp
 .vscode/
 .idea/
+.claude/

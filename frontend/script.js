@@ -127,6 +127,27 @@ if (form) {
 }
 
 // ---------------------------------------------------------
+// Mobile Navbar Toggle
+// ---------------------------------------------------------
+const navToggle = document.getElementById("navToggle");
+const navMenu = document.getElementById("navMenu");
+
+if (navToggle && navMenu) {
+  navToggle.addEventListener("click", () => {
+    const isOpen = navMenu.classList.toggle("open");
+    navToggle.setAttribute("aria-expanded", String(isOpen));
+  });
+
+  // Close the menu after a link is tapped
+  navMenu.querySelectorAll(".nav-link").forEach((link) => {
+    link.addEventListener("click", () => {
+      navMenu.classList.remove("open");
+      navToggle.setAttribute("aria-expanded", "false");
+    });
+  });
+}
+
+// ---------------------------------------------------------
 // Navbar Active Spy on Scroll
 // ---------------------------------------------------------
 const navLinks = document.querySelectorAll(".nav-link");
